@@ -28,7 +28,7 @@ class QuestionManager:
             return []
     
     def _load_statistics(self):
-        stats_file = Path('statistics.json')
+        stats_file = Path('data/statistics.json')
         try:
             if stats_file.exists():
                 logger.info("Loading existing statistics")
@@ -38,7 +38,8 @@ class QuestionManager:
             logger.warning("Failed to load statistics.json. Creating new statistics")
         
         logger.info("Creating new statistics file")
-        return {}  # Empty dict for storing user-specific statistics
+        stats_file.parent.mkdir(parents=True, exist_ok=True)
+        return {}
     
     def _get_user_stats(self, user_id):
         """Get or create statistics for specific user"""
@@ -59,7 +60,9 @@ class QuestionManager:
     def _save_statistics(self):
         try:
             logger.info("Saving statistics to file")
-            with open('statistics.json', 'w', encoding='utf-8') as f:
+            stats_file = Path('data/statistics.json')
+            stats_file.parent.mkdir(parents=True, exist_ok=True)
+            with open(stats_file, 'w', encoding='utf-8') as f:
                 json.dump(
                     self.stats,
                     f,
