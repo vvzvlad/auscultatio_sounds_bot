@@ -49,8 +49,9 @@ class UserSession:
         self.user_name = user.username or user.first_name
         self.lock = threading.Lock()
 
-        # Create sessions directory if it doesn't exist
-        self.SESSIONS_DIR.mkdir(exist_ok=True)
+        # Create all necessary directories
+        self.SESSIONS_DIR.parent.mkdir(exist_ok=True)  # Create 'data' directory
+        self.SESSIONS_DIR.mkdir(exist_ok=True)  # Create 'user_sessions' directory
 
         # Define session file path
         self.session_file = self.SESSIONS_DIR / f"user_{self.user_id}.json"
@@ -69,9 +70,13 @@ class UserSession:
             logger.info(f"Creating new session for user {self.user_info}")
             self.data = {}
 
-        # Always update user_name in data
-        self.data['user_name'] = self.user_name
-        self._save_session()  # Save immediately to ensure user_name is stored
+        # Always update user info in data
+        self.data.update({
+            'user_id': self.user_id,
+            'user_name': self.user_name,
+            'last_update': time.time()
+        })
+        self._save_session()  # Save immediately to ensure user data is stored
 
         try:
             self.question_selector = QuestionSelector()
@@ -703,6 +708,15 @@ def handle_theme_callback(call):
     if session.question_selector.set_theme(theme):
         session.set_theme(theme)  # Save theme to user profile
         theme_info = session.question_selector.get_current_theme()
+        
+        # Update and save user info
+        session.data.update({
+            'user_id': user.id,
+            'user_name': user.username or user.first_name,
+            'last_update': time.time()
+        })
+        session._save_session()
+        
         response = f"Выбрана {theme_info['name'].lower()}."
     else:
         response = f"Ошибка при выборе темы: {theme} не найдена"
