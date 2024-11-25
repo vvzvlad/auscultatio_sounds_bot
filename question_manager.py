@@ -6,8 +6,9 @@ import logging
 logger = logging.getLogger(__name__)
 
 class QuestionManager:
-    def __init__(self):
+    def __init__(self, bot):
         logger.info("Initializing QuestionManager")
+        self.bot = bot
         self.questions = self._load_questions()
         self.stats = self._load_statistics()
         self.all_answers = [q['correct_answer'] for q in self.questions]
@@ -129,8 +130,10 @@ class QuestionManager:
         stats['total'] += 1
         if is_correct:
             stats['correct'] += 1
+        
+        user_info = self.get_user_info(user_id)
         logger.info(
-            f"Updated stats for user {user_id}, question {question_id}: "
+            f"Updated stats for user {user_info}, question {question_id}: "
             f"from {old_stats} to {stats}"
         )
         self._save_statistics()
@@ -145,17 +148,19 @@ class QuestionManager:
             return {
                 'first_text': "Извините, состояние вопроса было потеряно. Пожалуйста, начните новый вопрос.",
                 'second_text': None,
-                'audio_paths': []
+                'audio_paths': [],
+                'show_next_button': True
             }
         
         is_correct = selected_answer == correct_answer
         
         if is_correct:
             return {
-                'first_text': (f"Вы выбрали ✅ \"{selected_answer}\" ✅, и это правильно! 😋\n\n"
+                'first_text': (f"✅ Ваш ответ \"{selected_answer}\", и он правильный! ✅\n\n"
                               f"{question['explanation']['detailed_text']}"),
                 'second_text': None,
-                'audio_paths': []
+                'audio_paths': [],
+                'show_next_button': True
             }
         else:
             # Найдем вопрос, который содержит выбранный ответ как правильный
@@ -164,7 +169,7 @@ class QuestionManager:
                 None
             )
             
-            first_text = (f"Вы выбрали ❌ \"{selected_answer}\" ❌, но это неправильный ответ 😕.\n"
+            first_text = (f"❌ Вы выбрали \"{selected_answer}\", но это неправильный ответ ❌\n"
                          f"Правильный ответ: \"{correct_answer}\"\n\n"
                          f"{question['explanation']['detailed_text']}\n\n"
                          f"А вот как звучит то, что вы выбрали (\"{selected_answer}\"):")
@@ -178,7 +183,8 @@ class QuestionManager:
             return {
                 'first_text': first_text,
                 'second_text': second_text,
-                'audio_paths': wrong_audio_paths
+                'audio_paths': wrong_audio_paths,
+                'show_next_button': False
             }
     
     def store_question_options(self, question_id, options):
@@ -223,16 +229,62 @@ class QuestionManager:
                     f" {q_stats['correct']}/{q_stats['total']} ({percentage:.1f}%)"
                 )
         
-        # Calculate overall percentage
-        overall_percentage = (
-            (total_correct / total_questions * 100) if total_questions > 0 else 0
+        # Calculate overall percentage for current user
+        user_percentage = (total_correct / total_questions * 100) if total_questions > 0 else 0
+        
+        # Get all users statistics for ranking
+        all_users_stats = {}
+        for uid, stats in self.stats.items():
+            user_total = 0
+            user_correct = 0
+            for q_stats in stats.values():
+                user_total += q_stats['total']
+                user_correct += q_stats['correct']
+            
+            if user_total > 0:  # Include only users with answers
+                user_percentage = (user_correct / user_total * 100)
+                try:
+                    user = self.bot.get_chat(uid)
+                    user_name = f"@{user.username}" if user.username else user.first_name
+                    all_users_stats[uid] = {
+                        'name': user_name,
+                        'percentage': user_percentage,
+                        'total': user_total,
+                        'correct': user_correct
+                    }
+                except Exception as e:
+                    logger.error(f"Failed to get user info for {uid}: {e}")
+                    continue
+        
+        # Sort users by number of correct answers, then by total answers
+        sorted_users = sorted(
+            all_users_stats.items(),
+            key=lambda x: (x[1]['correct'], x[1]['total']),
+            reverse=True
         )
+        
+        # Find current user's position and the leader
+        user_position = next(
+            (i + 1 for i, (uid, _) in enumerate(sorted_users) if uid == str(user_id)),
+            len(sorted_users)
+        )
+        
+        leader_info = ""
+        if sorted_users:
+            leader_id, leader_data = sorted_users[0]
+            if leader_id == str(user_id):
+                leader_info = "\n🏆 Поздравляем! Вы лидер рейтинга!"
+            else:
+                leader_info = (f"\n👑 Лидер рейтинга: {leader_data['name']} "
+                              f"({leader_data['correct']} правильных ответов, "
+                              f"{leader_data['percentage']:.1f}%)")
         
         # Construct message
         message = [
             "*Ваша статистика:*\n",
             f"Всего ответов: {total_questions}",
-            f"Правильных ответов: {total_correct} ({overall_percentage:.1f}%)\n",
+            f"Правильных ответов: {total_correct} ({user_percentage:.1f}%)",
+            f"Ваше место в рейтинге: {user_position} из {len(sorted_users)}{leader_info}\n",
             "*Статистика по вопросам:*"
         ]
         
@@ -243,7 +295,8 @@ class QuestionManager:
     def reset_user_statistics(self, user_id):
         """Reset statistics for specific user"""
         user_id = str(user_id)
-        logger.info(f"Resetting statistics for user {user_id}")
+        user_info = self.get_user_info(user_id)
+        logger.info(f"Resetting statistics for user {user_info}")
         
         # Create new empty statistics for all questions
         self.stats[user_id] = {
@@ -253,5 +306,67 @@ class QuestionManager:
         
         # Save updated statistics
         self._save_statistics()
-        logger.info(f"Statistics reset completed for user {user_id}")
+        logger.info(f"Statistics reset completed for user {user_info}")
+    
+    def get_global_statistics(self):
+        """Generate global statistics message"""
+        user_stats = {}
+        
+        # Собираем статистику по каждому пользователю
+        for user_id, stats in self.stats.items():
+            total_questions = 0
+            total_correct = 0
+            
+            for q_stats in stats.values():
+                total_questions += q_stats['total']
+                total_correct += q_stats['correct']
+            
+            if total_questions > 0:  # Исключаем пользователей без ответов
+                percentage = (total_correct / total_questions) * 100
+                try:
+                    user = self.bot.get_chat(user_id)
+                    # Используем username, если есть, иначе first_name
+                    user_name = f"@{user.username}" if user.username else user.first_name
+                    user_stats[user_name] = {
+                        'total': total_questions,
+                        'correct': total_correct,
+                        'percentage': percentage
+                    }
+                except Exception as e:
+                    logger.error(f"Failed to get user info for {user_id}: {e}")
+                    continue
+        
+        # Сортируем сначала по количеству правильных ответов, 
+        # при равенстве - по общему количеству ответов
+        sorted_stats = sorted(
+            user_stats.items(),
+            key=lambda x: (x[1]['correct'], x[1]['total']),
+            reverse=True
+        )
+        
+        # Формируем сообщение
+        message = ["*Общая статистика пользователей:*\n"]
+        
+        for user_name, stats in sorted_stats:
+            message.append(
+                f"*{user_name}*: всего отвеченных вопросов: {stats['total']}, "
+                f"правильно из них: {stats['correct']} ({stats['percentage']:.0f}%)"
+            )
+        
+        if not sorted_stats:
+            message.append("Пока нет статистики")
+        
+        return "\n".join(message)
+    
+    def get_user_info(self, user_id):
+        """Helper function to get user info for logs"""
+        try:
+            user = self.bot.get_chat(user_id)
+            # Skip bot's own messages
+            if user.is_bot:
+                return f"BOT ({user_id})"
+            return f"@{user.username}" if user.username else f"{user.first_name} ({user_id})"
+        except Exception as e:
+            logger.error(f"Failed to get user info for {user_id}: {e}")
+            return str(user_id)
     
