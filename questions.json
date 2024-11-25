@@ -2,7 +2,7 @@
   {
     "id": 1,
     "text": "Какой звук вы слышите при аускультации?",
-    "audio_paths": ["vezekuljarnoe.mp3"],
+    "audio_paths": ["vezekuljarnoe.ogg"],
     "correct_answer": "Везикулярное (альвеолярное) дыхание",
     "tag": "lung_sounds",
     "explanation": {
@@ -14,7 +14,7 @@
   {
     "id": 2,
     "text": "Какую патологию вы слышите?",
-    "audio_paths": ["vezekuljarnoe-low-levoe.mp3"],
+    "audio_paths": ["vezekuljarnoe-low-levoe.ogg"],
     "correct_answer": "Ослабленное везикулярное дыхание",
     "tag": "lung_sounds",
     "explanation": {
@@ -26,7 +26,7 @@
   {
     "id": 3,
     "text": "Какой тип дыхания вы слышите?",
-    "audio_paths": ["puerilnoe-dyshanie-levoe.mp3"],
+    "audio_paths": ["puerilnoe-dyshanie-levoe.ogg"],
     "correct_answer": "Пуэрильное дыхание",
     "tag": "lung_sounds",
     "explanation": {
@@ -38,7 +38,7 @@
   {
     "id": 4,
     "text": "Какой дыхательный шум вы слышите?",
-    "audio_paths": ["larinhotrahealnoe-dyshanie.mp3"],
+    "audio_paths": ["larinhotrahealnoe-dyshanie.ogg"],
     "correct_answer": "Ларинготрахеальное дыхание",
     "tag": "lung_sounds",
     "explanation": {
@@ -50,7 +50,7 @@
   {
     "id": 5,
     "text": "Какую патологию вы слышите?",
-    "audio_paths": ["krupoznoe.mp3"],
+    "audio_paths": ["krupoznoe.ogg"],
     "correct_answer": "Патологическое бронхиальное дыхание",
     "tag": "lung_sounds",
     "explanation": {
@@ -62,7 +62,7 @@
   {
     "id": 6,
     "text": "Какой патологический шум вы слышите?",
-    "audio_paths": ["abscess.mp3"],
+    "audio_paths": ["abscess.ogg"],
     "correct_answer": "Амфорическое дыхание",
     "tag": "lung_sounds",
     "explanation": {
@@ -74,7 +74,7 @@
   {
     "id": 7,
     "text": "Какой тип дыхания вы слышите?",
-    "audio_paths": ["zhestkoe-dyshanie.mp3"],
+    "audio_paths": ["zhestkoe-dyshanie.ogg"],
     "correct_answer": "Жесткое дыхание",
     "tag": "lung_sounds",
     "explanation": {
@@ -86,7 +86,7 @@
   {
     "id": 8,
     "text": "Какой дыхательный шум вы слышите?",
-    "audio_paths": ["sakkodirovannoe.mp3"],
+    "audio_paths": ["sakkodirovannoe.ogg"],
     "correct_answer": "Саккадированное дыхание",
     "tag": "lung_sounds",
     "explanation": {
@@ -98,7 +98,7 @@
   {
     "id": 9,
     "text": "Какой звук вы слышите при аускультации?",
-    "audio_paths": ["hripy.mp3", "forsirovannoj.mp3"],
+    "audio_paths": ["hripy.ogg", "forsirovannoj.ogg"],
     "correct_answer": "Сухие дискантовые (свистящие) хрипы",
     "tag": "lung_sounds",
     "explanation": {
@@ -110,7 +110,7 @@
   {
     "id": 10,
     "text": "Какой звук вы слышите при аускультации?",
-    "audio_paths": ["hripy-suhie.mp3", "suhoj.mp3"],
+    "audio_paths": ["hripy-suhie.ogg", "suhoj.ogg"],
     "correct_answer": "Сухие басовые хрипы",
     "tag": "lung_sounds",
     "explanation": {
@@ -122,7 +122,7 @@
   {
     "id": 11,
     "text": "Какой звук вы слышите при аускультации?",
-    "audio_paths": ["melko.mp3", "posle-pokashlivanija.mp3"],
+    "audio_paths": ["melko.ogg", "posle-pokashlivanija.ogg"],
     "correct_answer": "Влажные мелкопузырчатые хрипы",
     "tag": "lung_sounds",
     "explanation": {
@@ -134,7 +134,7 @@
   {
     "id": 12,
     "text": "Какой звук вы слышите при аускультации?",
-    "audio_paths": ["sredne.mp3", "srednie.mp3"],
+    "audio_paths": ["sredne.ogg", "srednie.ogg"],
     "correct_answer": "Влажные средне и крупнопузырчатые хрипы",
     "tag": "lung_sounds",
     "explanation": {
@@ -146,7 +146,7 @@
   {
     "id": 13,
     "text": "Какой звук вы слышите при аускультации?",
-    "audio_paths": ["melko-puzychatye.mp3"],
+    "audio_paths": ["melko-puzychatye.ogg"],
     "correct_answer": "Влажные не звонкие мелкопузырчатые хрипы",
     "tag": "lung_sounds",
     "explanation": {
@@ -158,7 +158,7 @@
   {
     "id": 14,
     "text": "Какой звук вы слышите при аускультации?",
-    "audio_paths": ["zvonkie.mp3"],
+    "audio_paths": ["zvonkie.ogg"],
     "correct_answer": "Влажные звонкие мелкопузырчатые хрипы",
     "tag": "lung_sounds",
     "explanation": {
@@ -170,7 +170,7 @@
   {
     "id": 15,
     "text": "Какой звук вы слышите при аускультации?",
-    "audio_paths": ["krepi.mp3", "krepitacija-posle.mp3"],
+    "audio_paths": ["krepi.ogg", "krepitacija-posle.ogg"],
     "correct_answer": "Крепитация",
     "tag": "lung_sounds",
     "explanation": {
@@ -182,7 +182,7 @@
   {
     "id": 16,
     "text": "Какой звук вы слышите при аускультации?",
-    "audio_paths": ["prervy.mp3", "plerva-posle.mp3", "trenie.mp3"],
+    "audio_paths": ["prervy.ogg", "plerva-posle.ogg", "trenie.ogg"],
     "correct_answer": "Шум трения плевры",
     "tag": "lung_sounds",
     "explanation": {

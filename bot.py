@@ -7,6 +7,8 @@ from dotenv import load_dotenv
 import os
 import logging
 from pathlib import Path
+import string
+import random as random_lib  # переименуем импорт чтобы избежать конфликта имен
 
 # Configure logging
 logging.basicConfig(
@@ -22,15 +24,20 @@ bot = telebot.TeleBot(BOT_TOKEN)
 
 question_manager = QuestionManager(bot)
 AUDIO_DIR = Path('audio')  
+AUDIO_ORIG_DIR = Path('audio/orig')  # Директория с оригинальными mp3 файлами
 
 def check_audio_files():
     """Check if all audio files exist"""
     missing_files = []
     for question in question_manager.questions:
         for audio_path in question.get('audio_paths', []):
-            full_path = AUDIO_DIR / audio_path
-            if not full_path.exists():
-                missing_files.append(audio_path)
+            ogg_path = AUDIO_DIR / audio_path
+            mp3_path = AUDIO_ORIG_DIR / audio_path.replace('.ogg', '.mp3')
+            
+            if not ogg_path.exists():
+                missing_files.append(f"OGG: {audio_path}")
+            if not mp3_path.exists():
+                missing_files.append(f"MP3: {audio_path.replace('.ogg', '.mp3')}")
     
     if missing_files:
         logger.warning(f"Missing audio files: {missing_files}")
@@ -42,6 +49,72 @@ def get_user_info(user):
     if user.is_bot:
         return f"BOT ({user.id})"
     return f"@{user.username}" if user.username else f"{user.first_name} ({user.id})"
+
+def generate_random_filename(original_filename):
+    """Generate random filename while preserving extension"""
+    # Get the file extension
+    extension = Path(original_filename).suffix
+    # Generate random string for filename (10 characters)
+    letters = string.ascii_lowercase + string.digits
+    random_name = ''.join(random_lib.choice(letters) for _ in range(10))
+    return f"audio_{random_name}{extension}"
+
+# Функция для отправки аудио с обработкой ошибок
+def send_audio_with_fallback(chat_id, audio_path, user_info):
+    """Send audio with fallback to document if voice messages are restricted"""
+    try:
+        # audio_path приходит как строка (например, "suhoj.ogg")
+        # Убираем лишний префикс audio/ если он есть
+        audio_path = str(audio_path).replace('audio/', '')
+        ogg_full_path = AUDIO_DIR / audio_path
+        mp3_full_path = AUDIO_ORIG_DIR / audio_path.replace('.ogg', '.mp3')
+        
+        if not ogg_full_path.exists():
+            logger.error(f"Audio file not found: {ogg_full_path}")
+            bot.send_message(chat_id, f"Аудио файл не найден")
+            return
+
+        with open(ogg_full_path, 'rb') as audio:
+            success = False
+            try:
+                bot.send_voice(chat_id, audio)
+                success = True
+            except telebot.apihelper.ApiTelegramException as e:
+                error_msg = str(e).lower()
+                if any(restriction in error_msg for restriction in 
+                        ["voice_messages_forbidden", "video messages", "restricted"]):
+                    logger.info(f"Voice messages restricted for user {user_info}, trying document")
+                    
+                    if not mp3_full_path.exists():
+                        logger.error(f"Original MP3 file not found: {mp3_full_path}")
+                        bot.send_message(chat_id, f"Аудио файл не найден")
+                        return
+                        
+                    try:
+                        with open(mp3_full_path, 'rb') as mp3_audio:
+                            random_filename = generate_random_filename(mp3_full_path.name)
+                            bot.send_document(
+                                chat_id, 
+                                mp3_audio,
+                                visible_file_name=random_filename
+                            )
+                            success = True
+                    except telebot.apihelper.ApiTelegramException as doc_e:
+                        logger.error(f"Failed to send document to user {user_info}: {doc_e}")
+                else:
+                    logger.error(f"Unexpected error for user {user_info}: {e}")
+                    raise
+
+            if not success:
+                bot.send_message(
+                    chat_id,
+                    "❌ К сожалению, не удалось отправить аудио. "
+                    "Пожалуйста, проверьте настройки конфиденциальности в Telegram."
+                )
+
+    except FileNotFoundError as e:
+        logger.error(f"File operation error: {e}")
+        bot.send_message(chat_id, f"Ошибка при работе с аудио файлом")
 
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
@@ -85,38 +158,8 @@ def send_question(message):
         bot.send_message(message.chat.id, "Аудио файлы не найдены!")
     else:
         selected_audio = random.choice(audio_paths)
-        audio_path = AUDIO_DIR / selected_audio
-        logger.info(f"Selected audio file: {audio_path}")
-        
-        try:
-            with open(audio_path, 'rb') as audio:
-                try:
-                    bot.send_voice(message.chat.id, audio)
-                except telebot.apihelper.ApiTelegramException as e:
-                    error_msg = str(e).lower()
-                    if any(restriction in error_msg for restriction in 
-                          ["voice_messages_forbidden", "video messages", "restricted"]):
-                        logger.info(f"Media messages restricted for user {user_info}, sending as audio file")
-                        bot.send_message(
-                            message.chat.id, 
-                            "⚠️ Похоже, у вас ограничен прием медиа-сообщений. "
-                            "Отправляю файл в другом формате."
-                        )
-                        audio.seek(0)
-                        try:
-                            bot.send_audio(message.chat.id, audio)
-                        except telebot.apihelper.ApiTelegramException as audio_e:
-                            logger.error(f"Failed to send audio file to user {user_info}: {audio_e}")
-                            bot.send_message(
-                                message.chat.id,
-                                "❌ К сожалению, не удалось отправить аудио. "
-                                "Пожалуйста, проверьте настройки конфиденциальности в Telegram."
-                            )
-                    else:
-                        raise
-        except FileNotFoundError:
-            logger.warning(f"Audio file not found: {audio_path}")
-            bot.send_message(message.chat.id, f"Аудио файл не найден")
+        logger.info(f"Selected audio file: {selected_audio}")
+        send_audio_with_fallback(message.chat.id, selected_audio, user_info)
     
     # Отправляем вопрос и варианты ответов
     message_text = f"❓ {question_data['text']}\n\n{options_text}"
@@ -173,34 +216,7 @@ def handle_answer(call):
         if answer_data['audio_paths']:
             selected_audio = random.choice(answer_data['audio_paths'])
             audio_path = AUDIO_DIR / selected_audio
-            try:
-                with open(audio_path, 'rb') as audio:
-                    try:
-                        bot.send_voice(call.message.chat.id, audio)
-                    except telebot.apihelper.ApiTelegramException as e:
-                        error_msg = str(e).lower()
-                        if any(restriction in error_msg for restriction in 
-                              ["voice_messages_forbidden", "video messages", "restricted"]):
-                            logger.info(f"Media messages restricted for user {get_user_info(call.from_user)}, sending as audio file")
-                            bot.send_message(
-                                call.message.chat.id,
-                                "⚠️ Похоже, у вас ограничен прием медиа-сообщений. "
-                                "Отправляю файл в другом формате."
-                            )
-                            audio.seek(0)
-                            try:
-                                bot.send_audio(call.message.chat.id, audio)
-                            except telebot.apihelper.ApiTelegramException as audio_e:
-                                logger.error(f"Failed to send audio file: {audio_e}")
-                                bot.send_message(
-                                    call.message.chat.id,
-                                    "❌ К сожалению, не удалось отправить аудио. "
-                                    "Пожалуйста, проверьте настройки конфиденциальности в Telegram."
-                                )
-                        else:
-                            raise
-            except FileNotFoundError:
-                logger.warning(f"Audio file not found: {audio_path}")
+            send_audio_with_fallback(call.message.chat.id, audio_path, user_info)
         
         # Отправляем второе сообщение с описанием неправильного ответа и кнопками
         if answer_data['second_text']:

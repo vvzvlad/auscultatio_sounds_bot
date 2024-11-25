@@ -146,7 +146,7 @@ class QuestionManager:
         # Если selected_answer is None, значит произошла ошибка или перезапуск бота
         if selected_answer is None:
             return {
-                'first_text': "Извините, состояние вопроса было потеряно. Пожалуйста, начните новый вопрос.",
+                'first_text': "Cостояние вопроса было потеряно. Пожалуйста, начните заново",
                 'second_text': None,
                 'audio_paths': [],
                 'show_next_button': True
@@ -156,8 +156,8 @@ class QuestionManager:
         
         if is_correct:
             return {
-                'first_text': (f"✅ Ваш ответ \"{selected_answer}\", и он правильный! ✅\n\n"
-                              f"{question['explanation']['detailed_text']}"),
+                'first_text': (f"✅ Правильно, *{selected_answer.lower()}*! ✅\n\n"
+                                f"{question['explanation']['detailed_text']}"),
                 'second_text': None,
                 'audio_paths': [],
                 'show_next_button': True
@@ -169,10 +169,10 @@ class QuestionManager:
                 None
             )
             
-            first_text = (f"❌ Вы выбрали \"{selected_answer}\", но это неправильный ответ ❌\n"
-                         f"Правильный ответ: \"{correct_answer}\"\n\n"
-                         f"{question['explanation']['detailed_text']}\n\n"
-                         f"А вот как звучит то, что вы выбрали (\"{selected_answer}\"):")
+            first_text = (f"❌ *{selected_answer}* — неправильный ответ ❌\n"
+                        f"Правильный ответ — *{correct_answer.lower()}*.\n\n"
+                        f"{question['explanation']['detailed_text']}\n\n"
+                        f"А вот как звучит *{selected_answer.lower()}*:")
             
             second_text = None
             wrong_audio_paths = []
@@ -242,13 +242,13 @@ class QuestionManager:
                 user_correct += q_stats['correct']
             
             if user_total > 0:  # Include only users with answers
-                user_percentage = (user_correct / user_total * 100)
+                percentage = (user_correct / user_total * 100) if user_total > 0 else 0
                 try:
                     user = self.bot.get_chat(uid)
                     user_name = f"@{user.username}" if user.username else user.first_name
                     all_users_stats[uid] = {
                         'name': user_name,
-                        'percentage': user_percentage,
+                        'percentage': percentage,
                         'total': user_total,
                         'correct': user_correct
                     }
