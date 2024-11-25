@@ -26,5 +26,5 @@ Telegram bot for learning auscultation sounds.
    docker-compose up -d
    ```
 
-The bot will store all working files (e.g., statistics) in the `./data` directory.
+The bot will store all working files (e.g., statistics) in the `data` volume.
 
