@@ -139,17 +139,44 @@ class QuestionManager:
         
         # Если selected_answer is None, значит произошла ошибка или перезапуск бота
         if selected_answer is None:
-            return "Извините, состояние вопроса было потеряно. Пожалуйста, начните новый вопрос."
+            return {
+                'first_text': "Извините, состояние вопроса было потеряно. Пожалуйста, начните новый вопрос.",
+                'second_text': None,
+                'audio_paths': []
+            }
         
         is_correct = selected_answer == correct_answer
         
         if is_correct:
-            return (f"Ваш ответ: ✅ \"{selected_answer}\" ✅, и это правильно!\n\n"
-                   f"{question['explanation']['detailed_text']}")
+            return {
+                'first_text': (f"Вы выбрали ✅ \"{selected_answer}\" ✅, и это правильно! 😋\n\n"
+                              f"{question['explanation']['detailed_text']}"),
+                'second_text': None,
+                'audio_paths': []
+            }
         else:
-            return (f"Ваш ответ: ❌ \"{selected_answer}\" ❌, но это неправильный ответ.\n"
-                   f"Правильный ответ: \"{correct_answer}\"\n\n"
-                   f"{question['explanation']['detailed_text']}")
+            # Найдем вопрос, который содержит выбранный ответ как правильный
+            wrong_question = next(
+                (q for q in self.questions if q['correct_answer'] == selected_answer),
+                None
+            )
+            
+            first_text = (f"Вы выбрали ❌ \"{selected_answer}\" ❌, но это неправильный ответ 😕.\n"
+                         f"Правильный ответ: \"{correct_answer}\"\n\n"
+                         f"{question['explanation']['detailed_text']}\n\n"
+                         f"А вот как звучит то, что вы выбрали (\"{selected_answer}\"):")
+            
+            second_text = None
+            wrong_audio_paths = []
+            if wrong_question:
+                second_text = wrong_question['explanation']['detailed_text']
+                wrong_audio_paths = wrong_question.get('audio_paths', [])
+            
+            return {
+                'first_text': first_text,
+                'second_text': second_text,
+                'audio_paths': wrong_audio_paths
+            }
     
     def store_question_options(self, question_id, options):
         """Store the current options for a question"""
@@ -189,8 +216,8 @@ class QuestionManager:
             if q_stats['total'] > 0:
                 percentage = (q_stats['correct'] / q_stats['total']) * 100
                 details.append(
-                    f"*{question['correct_answer']}*:\n"
-                    f"Правильно: {q_stats['correct']}/{q_stats['total']} ({percentage:.1f}%)"
+                    f"*{question['correct_answer']}*:"
+                    f" {q_stats['correct']}/{q_stats['total']} ({percentage:.1f}%)"
                 )
         
         # Calculate overall percentage
@@ -203,7 +230,7 @@ class QuestionManager:
             "*Ваша статистика:*\n",
             f"Всего ответов: {total_questions}",
             f"Правильных ответов: {total_correct} ({overall_percentage:.1f}%)\n",
-            "*Статистика по диагнозам:*"
+            "*Статистика по вопросам:*"
         ]
         
         message.extend(details)

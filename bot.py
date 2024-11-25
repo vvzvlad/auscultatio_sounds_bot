@@ -21,7 +21,7 @@ BOT_TOKEN = os.getenv('BOT_TOKEN')
 bot = telebot.TeleBot(BOT_TOKEN)
 
 question_manager = QuestionManager()
-AUDIO_DIR = Path('audio')  # или укажите правильный путь к вашей директории с аудио
+AUDIO_DIR = Path('audio')  
 
 def check_audio_files():
     """Check if all audio files exist"""
@@ -39,9 +39,8 @@ def check_audio_files():
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
     logger.info(f"New user started the bot: {message.from_user.id}")
-    markup = types.InlineKeyboardMarkup(row_width=1)
-    markup.add(types.InlineKeyboardButton("🎯 Начать тестирование", callback_data="next_question"))
-    bot.reply_to(message, "Добро пожаловать! Нажмите кнопку, чтобы начать тестирование.", reply_markup=markup)
+    bot.reply_to(message, "Добро пожаловать! Начинаем.")
+    send_question(message)
 
 @bot.message_handler(commands=['question'])
 def send_question(message):
@@ -49,51 +48,57 @@ def send_question(message):
     question_data = question_manager.get_random_question(message.from_user.id)
     
     if not question_data:
-        bot.reply_to(message, "К сожалению, вопросы не найдены.")
+        bot.reply_to(message, "Вопросы не найдены.")
         return
     
-    markup = types.InlineKeyboardMarkup(row_width=1)
     options = question_data['options']
     random.shuffle(options)
     
     question_manager.store_question_options(question_data['id'], options)
     
-    # Add each option as a simple button
-    for i, option in enumerate(options):
+    # Формируем текст с вариантами ответов
+    options_text = "\n".join([f"{i+1}️⃣ {option}" for i, option in enumerate(options)])
+    
+    # Создаем кнопки с номерами и эмодзи
+    markup = types.InlineKeyboardMarkup(row_width=len(options))  # все кнопки в одну строку
+    number_emojis = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
+    buttons = []
+    for i in range(len(options)):
         callback_data = f"{question_data['id']}:{i}"
-        markup.add(types.InlineKeyboardButton(option, callback_data=callback_data))
+        buttons.append(types.InlineKeyboardButton(number_emojis[i], callback_data=callback_data))
+    markup.add(*buttons) 
     
     logger.info(f"Sending question {question_data['id']} to user {message.from_user.id}")
     
-    # Select random audio file from available paths
+    # Отправляем аудио
     audio_paths = question_data.get('audio_paths', [])
     if not audio_paths:
         logger.warning(f"No audio files available for question {question_data['id']}")
         bot.send_message(message.chat.id, "К сожалению, аудио файлы не найдены, но вы можете продолжить отвечать на вопрос.")
     else:
         selected_audio = random.choice(audio_paths)
-        audio_path = AUDIO_DIR / selected_audio  # создаем полный путь к файлу
+        audio_path = AUDIO_DIR / selected_audio
         logger.info(f"Selected audio file: {audio_path}")
         
         try:
             with open(audio_path, 'rb') as audio:
                 try:
-                    # Сначала пробуем отправить как голосовое сообщение
                     bot.send_voice(message.chat.id, audio)
                 except telebot.apihelper.ApiTelegramException as e:
                     if "VOICE_MESSAGES_FORBIDDEN" in str(e):
                         logger.info(f"Voice messages forbidden for user {message.from_user.id}, sending as audio file")
                         bot.send_message(message.chat.id, "Вам запрещено присылать голосовые сообщения, отправляю файл.")
-                        # Перемотаем файл в начало и отправим как обычный аудио файл
                         audio.seek(0)
                         bot.send_audio(message.chat.id, audio)
                     else:
-                        raise  # Если это другая ошибка API, пробросим её дальше
+                        raise
         except FileNotFoundError:
             logger.warning(f"Audio file not found: {audio_path}")
-            bot.send_message(message.chat.id, "Выбранный аудио файл не найден, но вы можете продолжить отвечать на вопрос.")
+            bot.send_message(message.chat.id, f"Аудио файл {audio_path} не найден")
     
-    bot.send_message(message.chat.id, f"❓ {question_data['text']}", reply_markup=markup)
+    # Отправляем вопрос и варианты ответов
+    message_text = f"❓ {question_data['text']}\n\n{options_text}"
+    bot.send_message(message.chat.id, message_text, reply_markup=markup)
 
 @bot.callback_query_handler(func=lambda call: True)
 def handle_answer(call):
@@ -114,26 +119,63 @@ def handle_answer(call):
     )
     
     # Get detailed answer message
-    answer_message = question_manager.get_answer_message(question_id, selected_answer)
+    answer_data = question_manager.get_answer_message(question_id, selected_answer)
     
     # Show brief response in popup
     response = "Правильно! ✅" if is_correct else "Неправильно! ❌"
     bot.answer_callback_query(call.id, response)
     
-    # Create markup with "Next Question" and "Statistics" buttons
-    markup = types.InlineKeyboardMarkup(row_width=1)
-    markup.add(
-        types.InlineKeyboardButton("🔄 Следующий вопрос", callback_data="next_question"),
-        types.InlineKeyboardButton("📊 Моя статистика", callback_data="show_stats")
-    )
-    
-    # Send detailed explanation with new buttons
+    # Отправляем первое сообщение с ответом и правильным описанием
+    first_message = answer_data['first_text']
     bot.send_message(
         call.message.chat.id, 
-        answer_message, 
-        parse_mode='Markdown',
-        reply_markup=markup
+        first_message, 
+        parse_mode='Markdown'
     )
+    
+    # Если есть аудио неправильного ответа, отправляем его
+    if answer_data['audio_paths']:
+        selected_audio = random.choice(answer_data['audio_paths'])
+        audio_path = AUDIO_DIR / selected_audio
+        try:
+            with open(audio_path, 'rb') as audio:
+                try:
+                    bot.send_voice(call.message.chat.id, audio)
+                except telebot.apihelper.ApiTelegramException as e:
+                    if "VOICE_MESSAGES_FORBIDDEN" in str(e):
+                        logger.info(f"Voice messages forbidden for user {call.from_user.id}, sending as audio file")
+                        audio.seek(0)
+                        bot.send_audio(call.message.chat.id, audio)
+                    else:
+                        raise
+        except FileNotFoundError:
+            logger.warning(f"Audio file not found: {audio_path}")
+    
+    # Отправляем второе сообщение с описанием неправильного ответа и кнопками
+    if answer_data['second_text']:
+        markup = types.InlineKeyboardMarkup(row_width=1)
+        markup.add(
+            types.InlineKeyboardButton("🔄 Следующий вопрос", callback_data="next_question"),
+            types.InlineKeyboardButton("📊 Моя статистика", callback_data="show_stats")
+        )
+        bot.send_message(
+            call.message.chat.id,
+            answer_data['second_text'],
+            parse_mode='Markdown',
+            reply_markup=markup
+        )
+    else:
+        # Если второго сообщения нет (правильный ответ), добавляем кнопки к первому
+        markup = types.InlineKeyboardMarkup(row_width=1)
+        markup.add(
+            types.InlineKeyboardButton("🔄 Следующий вопрос", callback_data="next_question"),
+            types.InlineKeyboardButton("📊 Моя статистика", callback_data="show_stats")
+        )
+        bot.send_message(
+            call.message.chat.id,
+            "Выберите действие:",
+            reply_markup=markup
+        )
     
     # Update user's statistics
     question_manager.update_statistics(call.from_user.id, question_id, is_correct)
@@ -162,7 +204,7 @@ def handle_post_answer_buttons(call):
         markup.add(types.InlineKeyboardButton("🔄 Начать заново", callback_data="next_question"))
         bot.send_message(
             call.message.chat.id,
-            "✨ Ваша статистика была успешно сброшена. Можете начать тестирование заново!",
+            "✨ Cтатистика сброшена.",
             reply_markup=markup
         )
     bot.answer_callback_query(call.id)
