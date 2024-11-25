@@ -13,6 +13,7 @@ class QuestionManager:
         self.stats = self._load_statistics()
         self.all_answers = [q['correct_answer'] for q in self.questions]
         self.current_options = {}
+        self.current_user_id = None
     
     def _load_questions(self):
         try:
@@ -327,7 +328,8 @@ class QuestionManager:
                     user = self.bot.get_chat(user_id)
                     # Используем username, если есть, иначе first_name
                     user_name = f"@{user.username}" if user.username else user.first_name
-                    user_stats[user_name] = {
+                    user_stats[user_id] = {
+                        'name': user_name,
                         'total': total_questions,
                         'correct': total_correct,
                         'percentage': percentage
@@ -357,14 +359,17 @@ class QuestionManager:
             3: "🥉 Бронза"
         }
         
-        for index, (user_name, stats) in enumerate(sorted_stats, 1):
+        for index, (user_id, stats) in enumerate(sorted_stats, 1):
             if index in medals:
                 place = f"{medals[index]}: "
             else:
                 place = f"{index}-е место: "
             
+            # Добавляем пометку "(это вы)" для текущего пользователя
+            current_user = " _(это вы)_" if user_id == str(self.current_user_id) else ""
+            
             message.append(
-                f"{place}*{user_name}*: всего отвеченных вопросов: {stats['total']}, "
+                f"{place}*{stats['name']}*{current_user}: всего отвеченных вопросов: {stats['total']}, "
                 f"правильно из них: {stats['correct']} ({stats['percentage']:.0f}%)"
             )
         

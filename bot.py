@@ -268,7 +268,7 @@ def handle_post_answer_buttons(call):
         send_question(call.message)
     elif call.data == "show_stats":
         stats_message = question_manager.get_user_statistics(call.from_user.id)
-        markup = types.InlineKeyboardMarkup(row_width=2)  # Changed to 2 for one row
+        markup = types.InlineKeyboardMarkup(row_width=2)
         markup.add(
             types.InlineKeyboardButton("🔄 Следующий вопрос", callback_data="next_question"),
             types.InlineKeyboardButton("🌍 Общая статистика", callback_data="show_global_stats"),
@@ -281,8 +281,10 @@ def handle_post_answer_buttons(call):
             reply_markup=markup
         )
     elif call.data == "show_global_stats":
+        # Сохраняем ID текущего пользователя перед вызовом метода
+        question_manager.current_user_id = call.from_user.id
         stats_message = question_manager.get_global_statistics()
-        markup = types.InlineKeyboardMarkup(row_width=2)  # Changed to 2 for one row
+        markup = types.InlineKeyboardMarkup(row_width=2)
         markup.add(
             types.InlineKeyboardButton("🔄 К вопросам", callback_data="next_question"),
             types.InlineKeyboardButton("📊 Моя статистика", callback_data="show_stats")
