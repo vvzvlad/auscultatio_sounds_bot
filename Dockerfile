@@ -16,8 +16,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the entire audio directory
 COPY audio audio/
+COPY questions questions/
 
 # Copy the application code
-COPY bot.py question_manager.py questions.json ./
+COPY bot.py ./
 
 CMD ["python", "bot.py"] 
