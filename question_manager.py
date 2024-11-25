@@ -3,6 +3,7 @@ import random
 from pathlib import Path
 import logging
 
+# Initialize logger
 logger = logging.getLogger(__name__)
 
 class QuestionManager:
@@ -13,7 +14,7 @@ class QuestionManager:
         self.stats = self._load_statistics()
         self.all_answers = [q['correct_answer'] for q in self.questions]
         self.current_options = {}
-        self.current_user_id = None
+        self.current_user_id = None  # Store current user ID for global stats
     
     def _load_questions(self):
         try:
@@ -34,7 +35,7 @@ class QuestionManager:
         try:
             if stats_file.exists():
                 logger.info("Loading existing statistics")
-                with open(stats_file, 'r') as f:
+                with open(stats_file, 'r', encoding='utf-8') as f:
                     return json.load(f)
         except (FileNotFoundError, json.JSONDecodeError):
             logger.warning("Failed to load statistics.json. Creating new statistics")
@@ -144,10 +145,10 @@ class QuestionManager:
         question = next(q for q in self.questions if q['id'] == question_id)
         correct_answer = question['correct_answer']
         
-        # Если selected_answer is None, значит произошла ошибка или перезапуск бота
+        # If selected_answer is None, question state was lost
         if selected_answer is None:
             return {
-                'first_text': "Cостояние вопроса было потеряно. Пожалуйста, начните заново",
+                'first_text': "Состояние вопроса было потеряно. Пожалуйста, начните заново",
                 'second_text': None,
                 'audio_paths': [],
                 'show_next_button': True
@@ -164,7 +165,7 @@ class QuestionManager:
                 'show_next_button': True
             }
         else:
-            # Найдем вопрос, который содержит выбранный ответ как правильный
+            # Find question that contains selected answer as correct one
             wrong_question = next(
                 (q for q in self.questions if q['correct_answer'] == selected_answer),
                 None
@@ -276,9 +277,9 @@ class QuestionManager:
             if leader_id == str(user_id):
                 leader_info = "\n🏆 Поздравляем! Вы лидер рейтинга!"
             else:
-                leader_info = (f"\n👑 Лидер рейтинга: {leader_data['name']} "
-                              f"({leader_data['correct']} правильных ответов, "
-                              f"{leader_data['percentage']:.1f}%)")
+                leader_info = (f"\n👑 Leader: {leader_data['name']} "
+                                f"({leader_data['correct']} correct answers, "
+                                f"{leader_data['percentage']:.1f}%)")
         
         # Construct message
         message = [
@@ -313,7 +314,7 @@ class QuestionManager:
         """Generate global statistics message"""
         user_stats = {}
         
-        # Собираем статистику по каждому пользователю
+        # Collect statistics for each user
         for user_id, stats in self.stats.items():
             total_questions = 0
             total_correct = 0
@@ -322,11 +323,11 @@ class QuestionManager:
                 total_questions += q_stats['total']
                 total_correct += q_stats['correct']
             
-            if total_questions > 0:  # Исключаем пользователей без ответов
+            if total_questions > 0:  # Skip users without answers
                 percentage = (total_correct / total_questions) * 100
                 try:
                     user = self.bot.get_chat(user_id)
-                    # Используем username, если есть, иначе first_name
+                    # Use username if available, otherwise first_name
                     user_name = f"@{user.username}" if user.username else user.first_name
                     user_stats[user_id] = {
                         'name': user_name,
@@ -338,21 +339,20 @@ class QuestionManager:
                     logger.error(f"Failed to get user info for {user_id}: {e}")
                     continue
         
-        # Сортируем сначала по количеству правильных ответов, 
-        # при равенстве - по общему количеству ответов
+        # Sort first by number of correct answers, then by total answers
         sorted_stats = sorted(
             user_stats.items(),
             key=lambda x: (x[1]['correct'], x[1]['total']),
             reverse=True
         )
         
-        # Ограничиваем список 20 первыми пользователями
+        # Limit list to top 20 users
         sorted_stats = sorted_stats[:20]
         
-        # Формируем сообщение
+        # Form message
         message = ["*Рейтинг пользователей:*\n"]
         
-        # Словарь для медалей (только первые три места)
+        # Dictionary for medals (only first three places)
         medals = {
             1: "🥇 Золото",
             2: "🥈 Серебро",
@@ -365,8 +365,8 @@ class QuestionManager:
             else:
                 place = f"{index}-е место: "
             
-            # Добавляем пометку "(это вы)" для текущего пользователя
-            current_user = " _(это вы)_" if user_id == str(self.current_user_id) else ""
+            # Add "(this is you)" note for the current user
+            current_user = " _(this is you)_" if user_id == str(self.current_user_id) else ""
             
             message.append(
                 f"{place}*{stats['name']}*{current_user}: всего отвеченных вопросов: {stats['total']}, "

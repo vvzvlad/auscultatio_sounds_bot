@@ -1,14 +1,16 @@
-import telebot
-from telebot import types
-import random
 import json
-from question_manager import QuestionManager
-from dotenv import load_dotenv
-import os
 import logging
-from pathlib import Path
+import os
+import random
 import string
-import random as random_lib  # переименуем импорт чтобы избежать конфликта имен
+from pathlib import Path
+
+import telebot
+from dotenv import load_dotenv
+from question_manager import QuestionManager
+from telebot import types
+
+import random as random_lib
 
 # Configure logging
 logging.basicConfig(
@@ -24,7 +26,7 @@ bot = telebot.TeleBot(BOT_TOKEN)
 
 question_manager = QuestionManager(bot)
 AUDIO_DIR = Path('audio')  
-AUDIO_ORIG_DIR = Path('audio/orig')  # Директория с оригинальными mp3 файлами
+AUDIO_ORIG_DIR = Path('audio/orig')  # Directory with original mp3 files
 
 def check_audio_files():
     """Check if all audio files exist"""
@@ -59,12 +61,11 @@ def generate_random_filename(original_filename):
     random_name = ''.join(random_lib.choice(letters) for _ in range(10))
     return f"audio_{random_name}{extension}"
 
-# Функция для отправки аудио с обработкой ошибок
+# Function for sending audio with error handling
 def send_audio_with_fallback(chat_id, audio_path, user_info):
     """Send audio with fallback to document if voice messages are restricted"""
     try:
-        # audio_path приходит как строка (например, "suhoj.ogg")
-        # Убираем лишний префикс audio/ если он есть
+        # Remove audio/ prefix if exists
         audio_path = str(audio_path).replace('audio/', '')
         ogg_full_path = AUDIO_DIR / audio_path
         mp3_full_path = AUDIO_ORIG_DIR / audio_path.replace('.ogg', '.mp3')
@@ -137,11 +138,11 @@ def send_question(message):
     
     question_manager.store_question_options(question_data['id'], options)
     
-    # Формируем текст с вариантами ответов
+    # Format text with answer options
     options_text = "\n".join([f"{i+1}️⃣ {option}" for i, option in enumerate(options)])
     
-    # Создаем кнопки с номерами и эмодзи
-    markup = types.InlineKeyboardMarkup(row_width=len(options))  # все кнопки в одну строку
+    # Create buttons with numbers and emojis
+    markup = types.InlineKeyboardMarkup(row_width=len(options))  # All buttons in one row
     number_emojis = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
     buttons = []
     for i in range(len(options)):
@@ -151,7 +152,7 @@ def send_question(message):
     
     logger.info(f"Sending question {question_data['id']} to user {user_info}")
     
-    # Отправляем аудио
+    # Send audio files
     audio_paths = question_data.get('audio_paths', [])
     if not audio_paths:
         logger.warning(f"No audio files available for question {question_data['id']}")
@@ -161,7 +162,7 @@ def send_question(message):
         logger.info(f"Selected audio file: {selected_audio}")
         send_audio_with_fallback(message.chat.id, selected_audio, user_info)
     
-    # Отправляем вопрос и варианты ответов
+    # Send question and answer options
     message_text = f"❓ {question_data['text']}\n\n{options_text}"
     bot.send_message(message.chat.id, message_text, reply_markup=markup)
 
@@ -194,14 +195,14 @@ def handle_answer(call):
         response = "Правильно! ✅" if is_correct else "Неправильно! ❌"
         bot.answer_callback_query(call.id, response)
         
-        # Создаем разметку с кнопками в одну строку
-        markup = types.InlineKeyboardMarkup(row_width=2)  # Changed to 2 for buttons in one row
+        # Create markup with buttons in one row
+        markup = types.InlineKeyboardMarkup(row_width=2)
         markup.add(
             types.InlineKeyboardButton("🔄 Следующий вопрос", callback_data="next_question"),
             types.InlineKeyboardButton("📊 Моя статистика", callback_data="show_stats")
         )
         
-        # Отправляем первое сообщение с ответом и правильным описанием
+        # Send first message with answer and correct description
         first_message = answer_data['first_text']
         should_show_markup = is_correct or answer_data.get('show_next_button', False)
         
@@ -212,19 +213,19 @@ def handle_answer(call):
             reply_markup=markup if should_show_markup else None
         )
         
-        # Если есть аудио неправильного ответа, отправляем его
+        # If there is audio for wrong answer, send it
         if answer_data['audio_paths']:
             selected_audio = random.choice(answer_data['audio_paths'])
             audio_path = AUDIO_DIR / selected_audio
             send_audio_with_fallback(call.message.chat.id, audio_path, user_info)
         
-        # Отправляем второе сообщение с описанием неправильного ответа и кнопками
+        # Send second message with wrong answer description and buttons
         if answer_data['second_text']:
             bot.send_message(
                 call.message.chat.id,
                 answer_data['second_text'],
                 parse_mode='Markdown',
-                reply_markup=markup  # Для неправильного ответа добавляем кнопки к последнему сообщению
+                reply_markup=markup  # Add buttons to last message for wrong answer
             )
         
         # Update user's statistics only if we have a valid answer
