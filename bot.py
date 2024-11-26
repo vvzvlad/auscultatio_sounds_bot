@@ -23,7 +23,6 @@ from telebot import types
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
-# Configure logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
@@ -265,12 +264,25 @@ class UserSession:
             question = random.choice(candidate_questions)
             correct_answer = question['correct_answer']
 
-            # Get other answers
-            other_answers = [q['correct_answer'] for q in questions if q['id'] != question['id']]
-            wrong_answers = random.sample(other_answers, min(len(other_answers), num_options - 1))
-            options = wrong_answers + [correct_answer]
+            # Handle 'wrong_answers' if present in the question
+            if 'wrong_answers' in question:
+                wrong_answers = question['wrong_answers']
+                if len(wrong_answers) >= num_options - 1:
+                    # Use provided wrong_answers, selecting only (num_options-1) if more are provided
+                    selected_wrong = random.sample(wrong_answers, num_options - 1)
+                else:
+                    # Use provided wrong_answers and supplement with random ones
+                    other_answers = [q['correct_answer'] for q in questions if q['id'] != question['id']]
+                    needed = (num_options - 1) - len(wrong_answers)
+                    random_wrong = random.sample(other_answers, needed) if needed > 0 else []
+                    selected_wrong = wrong_answers + random_wrong
+                options = selected_wrong + [correct_answer]
+            else:
+                other_answers = [q['correct_answer'] for q in questions if q['id'] != question['id']]
+                wrong_answers = random.sample(other_answers, min(len(other_answers), num_options - 1))
+                options = wrong_answers + [correct_answer]
+            
             random.shuffle(options)
-
             correct_option = options.index(correct_answer) + 1  # 1-based indexing
 
             # Handle files if present
@@ -522,7 +534,7 @@ def generate_and_send_question(session, chat_id, user_info):
                         return False
                     else:
                         logger.error(f"Failed to send audio file {file_path} for user {user_info}: {e}")
-                        bot.send_message(chat_id, "Не удалось отправить аудио��айл")
+                        bot.send_message(chat_id, "Не удалось отправить аудиоайл")
                         return False
             if "jpg" in question['file'] or "png" in question['file']:
                 logger.info(f"Selected image file {question['file']}")
@@ -670,7 +682,7 @@ def handle_global_stats_callback(call):
         for i, stat in enumerate(stats, 1):
             position_mark = get_position_emoji(i)
             if str(user.id) == stat['user_id']:
-                user_mark = f"@{stat['user_name']} 👤"
+                user_mark = f"@{stat['user_name']} (это вы)"
             else:
                 user_mark = f"@{stat['user_name']}"
             percentage = (stat['correct']/stat['total']*100)
@@ -722,11 +734,16 @@ def handle_stats_callback(call):
                 f"Вопросы:\n"
             )
             
+            response_lines = []
             for q_stat in theme_stats['questions']:
-                response += (
-                    f"{q_stat['total']}/{q_stat['correct']}"
-                    f"({q_stat['percentage']:.1f}%): *{q_stat['question']}*\n"
-                )
+                response_lines.append(f"{q_stat['total']}/{q_stat['correct']} ({q_stat['percentage']:.1f}%): *{q_stat['question']}*\n")
+                
+            # Join lines and truncate if over 4000 chars
+            response_text = "".join(response_lines)
+            max_length = 3000
+            if len(response_text) > max_length:
+                response_text = response_text[:max_length] + "..."
+            response += response_text
         else:
             response = "По теме нет статистики"
         
