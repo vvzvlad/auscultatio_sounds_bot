@@ -1,0 +1,1751 @@
+{
+  "tag": "lingua_latina_non_penis_canina",
+  "name": "Lingua latina non penis canina",
+  "questions": [
+    {
+      "id": 1,
+      "text": "Переведите c латыни: inflammatio",
+      "correct_answer": "Воспаление"
+    },
+    {
+      "id": 2,
+      "text": "Переведите c латыни: concrementum",
+      "correct_answer": "Конкремент"
+    },
+    {
+      "id": 3,
+      "text": "Переведите c латыни: febris",
+      "correct_answer": "Лихорадка"
+    },
+    {
+      "id": 4,
+      "text": "Переведите c латыни: fistula",
+      "correct_answer": "Свищ"
+    },
+    {
+      "id": 5,
+      "text": "Переведите c латыни: hernia",
+      "correct_answer": "Грыжа"
+    },
+    {
+      "id": 6,
+      "text": "Переведите c латыни: insufficientia",
+      "correct_answer": "Недостаточность"
+    },
+    {
+      "id": 7,
+      "text": "Переведите c латыни: luxatio",
+      "correct_answer": "Вывих"
+    },
+    {
+      "id": 8,
+      "text": "Переведите c латыни: stupor",
+      "correct_answer": "Ступор"
+    },
+    {
+      "id": 9,
+      "text": "Переведите c латыни: tumor",
+      "correct_answer": "Опухоль"
+    },
+    {
+      "id": 10,
+      "text": "Переведите c латыни: tussis",
+      "correct_answer": "Кашель"
+    },
+    {
+      "id": 11,
+      "text": "Переведите c латыни: aqua",
+      "correct_answer": "Вода"
+    },
+    {
+      "id": 12,
+      "text": "Переведите c латыни: liquor",
+      "correct_answer": "Жидкость"
+    },
+    {
+      "id": 13,
+      "text": "Переведите c латыни: quercus",
+      "correct_answer": "Дуб"
+    },
+    {
+      "id": 14,
+      "text": "Переведите c латыни: quinque",
+      "correct_answer": "Пять"
+    },
+    {
+      "id": 15,
+      "text": "Переведите c латыни: animal",
+      "correct_answer": "Животное"
+    },
+    {
+      "id": 16,
+      "text": "Переведите c латыни: collum",
+      "correct_answer": "Шея"
+    },
+    {
+      "id": 17,
+      "text": "Переведите c латыни: labium",
+      "correct_answer": "Губа"
+    },
+    {
+      "id": 18,
+      "text": "Переведите c латыни: lamina",
+      "correct_answer": "Пластина"
+    },
+    {
+      "id": 19,
+      "text": "Переведите c латыни: septum",
+      "correct_answer": "Перегородка"
+    },
+    {
+      "id": 20,
+      "text": "Переведите c латыни: scapula",
+      "correct_answer": "Лопатка"
+    },
+    {
+      "id": 21,
+      "text": "Переведите c латыни: basis",
+      "correct_answer": "Основание"
+    },
+    {
+      "id": 22,
+      "text": "Переведите c латыни: plasma",
+      "correct_answer": "Плазма"
+    },
+    {
+      "id": 23,
+      "text": "Переведите c латыни: mensio",
+      "correct_answer": "Измерение"
+    },
+    {
+      "id": 24,
+      "text": "Переведите c латыни: radix",
+      "correct_answer": "Корень"
+    },
+    {
+      "id": 25,
+      "text": "Переведите c латыни: apex",
+      "correct_answer": "Верхушка"
+    },
+    {
+      "id": 26,
+      "text": "Переведите c латыни: exitus",
+      "correct_answer": "Исход"
+    },
+    {
+      "id": 27,
+      "text": "Переведите c латыни: zygoma",
+      "correct_answer": "Скула"
+    },
+    {
+      "id": 28,
+      "text": "Переведите c латыни: zona",
+      "correct_answer": "Пояс"
+    },
+    {
+      "id": 29,
+      "text": "Переведите c латыни: eczema",
+      "correct_answer": "Заболевание кожи"
+    },
+    {
+      "id": 30,
+      "text": "Переведите c латыни: zincum",
+      "correct_answer": "Цинк"
+    },
+    {
+      "id": 31,
+      "text": "Переведите c латыни: influenza",
+      "correct_answer": "Грипп"
+    },
+    {
+      "id": 32,
+      "text": "Переведите c латыни: lingua",
+      "correct_answer": "Язык"
+    },
+    {
+      "id": 33,
+      "text": "Переведите c латыни: unguis",
+      "correct_answer": "Ноготь"
+    },
+    {
+      "id": 34,
+      "text": "Переведите c латыни: sanguis",
+      "correct_answer": "Кровь"
+    },
+    {
+      "id": 35,
+      "text": "Переведите c латыни: ungula",
+      "correct_answer": "Копыто"
+    },
+    {
+      "id": 36,
+      "text": "Переведите c латыни: angustus",
+      "correct_answer": "Узкий"
+    },
+    {
+      "id": 37,
+      "text": "Переведите c латыни: substantia",
+      "correct_answer": "Вещество"
+    },
+    {
+      "id": 38,
+      "text": "Переведите c латыни: operatio",
+      "correct_answer": "Операция"
+    },
+    {
+      "id": 39,
+      "text": "Переведите c латыни: mixtio",
+      "correct_answer": "Смешивание"
+    },
+    {
+      "id": 40,
+      "text": "Переведите c латыни: ostium",
+      "correct_answer": "Вход"
+    },
+    {
+      "id": 41,
+      "text": "Переведите c латыни: bestia",
+      "correct_answer": "Дикое животное"
+    },
+    {
+      "id": 42,
+      "text": "Переведите c латыни: chirurgus",
+      "correct_answer": "Хирург"
+    },
+    {
+      "id": 43,
+      "text": "Переведите c латыни: chamomilla",
+      "correct_answer": "Ромашка"
+    },
+    {
+      "id": 44,
+      "text": "Переведите c латыни: machina",
+      "correct_answer": "Машина"
+    },
+    {
+      "id": 45,
+      "text": "Переведите c латыни: encephalon",
+      "correct_answer": "Мозг"
+    },
+    {
+      "id": 46,
+      "text": "Переведите c латыни: sphincter",
+      "correct_answer": "Сжиматель"
+    },
+    {
+      "id": 47,
+      "text": "Переведите c латыни: phalanx",
+      "correct_answer": "Фаланга"
+    },
+    {
+      "id": 48,
+      "text": "Переведите c латыни: rhaphe",
+      "correct_answer": "Шов"
+    },
+    {
+      "id": 49,
+      "text": "Переведите c латыни: rhythmus",
+      "correct_answer": "Чередование"
+    },
+    {
+      "id": 50,
+      "text": "Переведите c латыни: thorax",
+      "correct_answer": "Грудная клетка"
+    },
+    {
+      "id": 51,
+      "text": "Переведите c латыни: therapia",
+      "correct_answer": "Лечение"
+    },
+    {
+      "id": 52,
+      "text": "Переведите c латыни: dyspnoë",
+      "correct_answer": "Одышка"
+    },
+    {
+      "id": 53,
+      "text": "Переведите c латыни: phlegmone",
+      "correct_answer": "Флегмона"
+    },
+    {
+      "id": 54,
+      "text": "Переведите c латыни: coma",
+      "correct_answer": "Кома"
+    },
+    {
+      "id": 55,
+      "text": "Переведите c латыни: erythēma",
+      "correct_answer": "Эритема"
+    },
+    {
+      "id": 56,
+      "text": "Переведите c латыни: eczēma",
+      "correct_answer": "Экзема"
+    },
+    {
+      "id": 57,
+      "text": "Переведите c латыни: emphysēma",
+      "correct_answer": "Эмфизема"
+    },
+    {
+      "id": 58,
+      "text": "Переведите c латыни: empyēma",
+      "correct_answer": "Эмпиема"
+    },
+    {
+      "id": 59,
+      "text": "Переведите c латыни: oedēma",
+      "correct_answer": "Отек"
+    },
+    {
+      "id": 60,
+      "text": "Переведите c латыни: trauma",
+      "correct_answer": "Травма"
+    },
+    {
+      "id": 61,
+      "text": "Переведите c латыни: vertebra",
+      "correct_answer": "Позвонок"
+    },
+    {
+      "id": 62,
+      "text": "Переведите c латыни: foramen",
+      "correct_answer": "Отверстие"
+    },
+    {
+      "id": 63,
+      "text": "Переведите c латыни: canalis",
+      "correct_answer": "Канал"
+    },
+    {
+      "id": 64,
+      "text": "Переведите c латыни: corpus",
+      "correct_answer": "Тело"
+    },
+    {
+      "id": 65,
+      "text": "Переведите c латыни: crista",
+      "correct_answer": "Гребень"
+    },
+    {
+      "id": 66,
+      "text": "Переведите c латыни: caput",
+      "correct_answer": "Головка"
+    },
+    {
+      "id": 67,
+      "text": "Переведите c латыни: fossa",
+      "correct_answer": "Ямка"
+    },
+    {
+      "id": 68,
+      "text": "Переведите c латыни: arcus",
+      "correct_answer": "Дуга"
+    },
+    {
+      "id": 69,
+      "text": "Переведите c латыни: incisura",
+      "correct_answer": "Вырезка"
+    },
+    {
+      "id": 70,
+      "text": "Переведите c латыни: processus",
+      "correct_answer": "Отросток"
+    },
+    {
+      "id": 71,
+      "text": "Переведите c латыни: spatium",
+      "correct_answer": "Пространство"
+    },
+    {
+      "id": 72,
+      "text": "Переведите c латыни: costa",
+      "correct_answer": "Ребро"
+    },
+    {
+      "id": 73,
+      "text": "Переведите c латыни: os",
+      "correct_answer": "Кость"
+    },
+    {
+      "id": 74,
+      "text": "Переведите c латыни: tuberculum",
+      "correct_answer": "Бугорок"
+    },
+    {
+      "id": 75,
+      "text": "Переведите c латыни: sulcus",
+      "correct_answer": "Желоб"
+    },
+    {
+      "id": 76,
+      "text": "Переведите c латыни: sternum",
+      "correct_answer": "Грудина"
+    },
+    {
+      "id": 77,
+      "text": "Переведите c латыни: manubrium",
+      "correct_answer": "Рукоятка"
+    },
+    {
+      "id": 78,
+      "text": "Переведите c латыни: cartilago",
+      "correct_answer": "Хрящ"
+    },
+    {
+      "id": 79,
+      "text": "Переведите c латыни: cervix",
+      "correct_answer": "Шея"
+    },
+    {
+      "id": 80,
+      "text": "Переведите c латыни: atlas",
+      "correct_answer": "Атлант"
+    },
+    {
+      "id": 81,
+      "text": "Переведите c латыни: ala",
+      "correct_answer": "Крыло"
+    },
+    {
+      "id": 82,
+      "text": "Переведите c латыни: massa",
+      "correct_answer": "Масса"
+    },
+    {
+      "id": 83,
+      "text": "Переведите c латыни: axis",
+      "correct_answer": "Эпистрофей"
+    },
+    {
+      "id": 84,
+      "text": "Переведите c латыни: dens",
+      "correct_answer": "Зуб"
+    },
+    {
+      "id": 85,
+      "text": "Переведите c латыни: facies",
+      "correct_answer": "Поверхность"
+    },
+    {
+      "id": 86,
+      "text": "Переведите c латыни: lumbus",
+      "correct_answer": "Поясница"
+    },
+    {
+      "id": 87,
+      "text": "Переведите c латыни: sacrum",
+      "correct_answer": "Крестец"
+    },
+    {
+      "id": 88,
+      "text": "Переведите c латыни: promantorium",
+      "correct_answer": "Мыс"
+    },
+    {
+      "id": 89,
+      "text": "Переведите c латыни: cauda",
+      "correct_answer": "Хвост"
+    },
+    {
+      "id": 90,
+      "text": "Переведите c латыни: cranium",
+      "correct_answer": "Череп"
+    },
+    {
+      "id": 91,
+      "text": "Переведите c латыни: occiput",
+      "correct_answer": "Затылок"
+    },
+    {
+      "id": 92,
+      "text": "Переведите c латыни: pars",
+      "correct_answer": "Часть"
+    },
+    {
+      "id": 93,
+      "text": "Переведите c латыни: musculus",
+      "correct_answer": "Мышца"
+    },
+    {
+      "id": 94,
+      "text": "Переведите c латыни: impressio",
+      "correct_answer": "Вдавление"
+    },
+    {
+      "id": 95,
+      "text": "Переведите c латыни: condylus",
+      "correct_answer": "Мыщелок"
+    },
+    {
+      "id": 96,
+      "text": "Переведите c латыни: nervus",
+      "correct_answer": "Нерв"
+    },
+    {
+      "id": 97,
+      "text": "Переведите c латыни: squama",
+      "correct_answer": "Чешуя"
+    },
+    {
+      "id": 98,
+      "text": "Переведите c латыни: spina",
+      "correct_answer": "Ость"
+    },
+    {
+      "id": 99,
+      "text": "Переведите c латыни: sella",
+      "correct_answer": "Седло"
+    },
+    {
+      "id": 100,
+      "text": "Переведите c латыни: dorsum",
+      "correct_answer": "Спинка"
+    },
+    {
+      "id": 101,
+      "text": "Переведите c латыни: fissura",
+      "correct_answer": "Щель"
+    },
+    {
+      "id": 102,
+      "text": "Переведите c латыни: rostrum",
+      "correct_answer": "Клюв"
+    },
+    {
+      "id": 103,
+      "text": "Переведите c латыни: hamulus",
+      "correct_answer": "Крючок"
+    },
+    {
+      "id": 104,
+      "text": "Переведите c латыни: meatus",
+      "correct_answer": "Ход"
+    },
+    {
+      "id": 105,
+      "text": "Переведите c латыни: bulla",
+      "correct_answer": "Пузырь"
+    },
+    {
+      "id": 106,
+      "text": "Переведите c латыни: sinus",
+      "correct_answer": "Пазуха"
+    },
+    {
+      "id": 107,
+      "text": "Переведите c латыни: labyrinthus",
+      "correct_answer": "Лабиринт"
+    },
+    {
+      "id": 108,
+      "text": "Переведите c латыни: nasus",
+      "correct_answer": "Нос"
+    },
+    {
+      "id": 109,
+      "text": "Переведите c латыни: margo",
+      "correct_answer": "Край"
+    },
+    {
+      "id": 110,
+      "text": "Переведите c латыни: alveolum",
+      "correct_answer": "Альвеола"
+    },
+    {
+      "id": 111,
+      "text": "Переведите c латыни: vomer",
+      "correct_answer": "Сошник"
+    },
+    {
+      "id": 112,
+      "text": "Переведите c латыни: choanae",
+      "correct_answer": "Хоаны"
+    },
+    {
+      "id": 113,
+      "text": "Переведите c латыни: ramus",
+      "correct_answer": "Ветвь"
+    },
+    {
+      "id": 114,
+      "text": "Переведите c латыни: angulus",
+      "correct_answer": "Угол"
+    },
+    {
+      "id": 115,
+      "text": "Переведите c латыни: cornu",
+      "correct_answer": "Рог"
+    },
+    {
+      "id": 116,
+      "text": "Переведите c латыни: maxilla",
+      "correct_answer": "Верхняя челюсть"
+    },
+    {
+      "id": 117,
+      "text": "Переведите c латыни: mandibula",
+      "correct_answer": "Нижняя челюсть"
+    },
+    {
+      "id": 118,
+      "text": "Переведите c латыни: tempus",
+      "correct_answer": "Висок"
+    },
+    {
+      "id": 119,
+      "text": "Переведите c латыни: frons",
+      "correct_answer": "Лоб"
+    },
+    {
+      "id": 120,
+      "text": "Переведите c латыни: trochlea",
+      "correct_answer": "Блок"
+    },
+    {
+      "id": 121,
+      "text": "Переведите c латыни: tuberositas",
+      "correct_answer": "Шероховатость"
+    },
+    {
+      "id": 122,
+      "text": "Переведите c латыни: humerus",
+      "correct_answer": "Плечо"
+    },
+    {
+      "id": 123,
+      "text": "Переведите c латыни: antebrachii",
+      "correct_answer": "Предплечье"
+    },
+    {
+      "id": 124,
+      "text": "Переведите c латыни: manus",
+      "correct_answer": "Кисть"
+    },
+    {
+      "id": 125,
+      "text": "Переведите c латыни: circumferential",
+      "correct_answer": "Окружность"
+    },
+    {
+      "id": 126,
+      "text": "Переведите c латыни: pedis",
+      "correct_answer": "Стопа"
+    },
+    {
+      "id": 127,
+      "text": "Переведите c латыни: parasagittalis",
+      "correct_answer": "Парасагиттальный"
+    },
+    {
+      "id": 128,
+      "text": "Переведите c латыни: rostralis",
+      "correct_answer": "Ростральный"
+    },
+    {
+      "id": 129,
+      "text": "Переведите c латыни: nasalis",
+      "correct_answer": "Назальный"
+    },
+    {
+      "id": 130,
+      "text": "Переведите c латыни: aboralis",
+      "correct_answer": "Аборальный"
+    },
+    {
+      "id": 131,
+      "text": "Переведите c латыни: anterior",
+      "correct_answer": "Передний"
+    },
+    {
+      "id": 132,
+      "text": "Переведите c латыни: posterior",
+      "correct_answer": "Задний"
+    },
+    {
+      "id": 133,
+      "text": "Переведите c латыни: superior",
+      "correct_answer": "Верхний"
+    },
+    {
+      "id": 134,
+      "text": "Переведите c латыни: inferior",
+      "correct_answer": "Нижний"
+    },
+    {
+      "id": 135,
+      "text": "Переведите c латыни: jugularis",
+      "correct_answer": "Яремный"
+    },
+    {
+      "id": 136,
+      "text": "Переведите c латыни: opticus",
+      "correct_answer": "Зрительный"
+    },
+    {
+      "id": 137,
+      "text": "Переведите c латыни: rotundus",
+      "correct_answer": "Круглый"
+    },
+    {
+      "id": 138,
+      "text": "Переведите c латыни: ovalis",
+      "correct_answer": "Овальный"
+    },
+    {
+      "id": 139,
+      "text": "Переведите c латыни: caroticus",
+      "correct_answer": "Сонный"
+    },
+    {
+      "id": 140,
+      "text": "Переведите c латыни: trochlearis",
+      "correct_answer": "Блоковый"
+    },
+    {
+      "id": 141,
+      "text": "Переведите c латыни: ulnaris",
+      "correct_answer": "Локтевой"
+    },
+    {
+      "id": 142,
+      "text": "Переведите c латыни: accessorius",
+      "correct_answer": "Добавочный"
+    },
+    {
+      "id": 143,
+      "text": "Переведите c латыни: palmaris",
+      "correct_answer": "Пальмарный"
+    },
+    {
+      "id": 144,
+      "text": "Переведите c латыни: compedalis",
+      "correct_answer": "Путовый"
+    },
+    {
+      "id": 145,
+      "text": "Переведите c латыни: ungularis",
+      "correct_answer": "Копытный"
+    },
+    {
+      "id": 146,
+      "text": "Переведите c латыни: unguicularis",
+      "correct_answer": "Когтевой"
+    },
+    {
+      "id": 147,
+      "text": "Переведите c латыни: extensorius",
+      "correct_answer": "Разгибательный"
+    },
+    {
+      "id": 148,
+      "text": "Переведите c латыни: flexorius",
+      "correct_answer": "Сгибательный"
+    },
+    {
+      "id": 149,
+      "text": "Переведите c латыни: parietalis",
+      "correct_answer": "Притенный"
+    },
+    {
+      "id": 150,
+      "text": "Переведите c латыни: plantaris",
+      "correct_answer": "Подошвенный"
+    },
+    {
+      "id": 151,
+      "text": "Переведите c латыни: sesamoides",
+      "correct_answer": "Сесамовидный"
+    },
+    {
+      "id": 152,
+      "text": "Переведите c латыни: iliacus",
+      "correct_answer": "Подвздошный"
+    },
+    {
+      "id": 153,
+      "text": "Переведите c латыни: pubicus",
+      "correct_answer": "Лонный"
+    },
+    {
+      "id": 154,
+      "text": "Переведите c латыни: ischiadicus",
+      "correct_answer": "Седалищный"
+    },
+    {
+      "id": 155,
+      "text": "Переведите c латыни: obturatorius",
+      "correct_answer": "Запертый"
+    },
+    {
+      "id": 156,
+      "text": "Переведите c латыни: xiphoideus",
+      "correct_answer": "Мечевидный"
+    },
+    {
+      "id": 157,
+      "text": "Переведите c латыни: verus",
+      "correct_answer": "Истинный"
+    },
+    {
+      "id": 158,
+      "text": "Переведите c латыни: spurius",
+      "correct_answer": "Ложный"
+    },
+    {
+      "id": 159,
+      "text": "Переведите c латыни: auricularis",
+      "correct_answer": "Ушковидный"
+    },
+    {
+      "id": 160,
+      "text": "Переведите c латыни: nuchales",
+      "correct_answer": "Выйный"
+    },
+    {
+      "id": 161,
+      "text": "Переведите c латыни: laceratus",
+      "correct_answer": "Рванный"
+    },
+    {
+      "id": 162,
+      "text": "Переведите c латыни: cribrosa",
+      "correct_answer": "Продырявленный"
+    },
+    {
+      "id": 163,
+      "text": "Переведите c латыни: perpendicularis",
+      "correct_answer": "Перпендикулярный"
+    },
+    {
+      "id": 164,
+      "text": "Переведите c латыни: olfactorius",
+      "correct_answer": "Обонятельный"
+    },
+    {
+      "id": 165,
+      "text": "Переведите c латыни: conchalis",
+      "correct_answer": "Раковинный"
+    },
+    {
+      "id": 166,
+      "text": "Переведите c латыни: edentulus",
+      "correct_answer": "Беззубый"
+    },
+    {
+      "id": 167,
+      "text": "Переведите c латыни: distalis",
+      "correct_answer": "Дистальный"
+    },
+    {
+      "id": 168,
+      "text": "Переведите c латыни: proximalis",
+      "correct_answer": "Проксимальный"
+    },
+    {
+      "id": 169,
+      "text": "Переведите c латыни: placidus",
+      "correct_answer": "Плоский"
+    },
+    {
+      "id": 170,
+      "text": "Переведите c латыни: fibrosus",
+      "correct_answer": "Фиброзный"
+    },
+    {
+      "id": 171,
+      "text": "Переведите c латыни: radialis",
+      "correct_answer": "Радиальный"
+    },
+    {
+      "id": 172,
+      "text": "Переведите c латыни: chirurgicus",
+      "correct_answer": "Хирургический"
+    },
+    {
+      "id": 173,
+      "text": "Переведите c латыни: deltoideus",
+      "correct_answer": "Дельтовидный"
+    },
+    {
+      "id": 174,
+      "text": "Переведите c латыни: ligamentosus",
+      "correct_answer": "Связочный"
+    },
+    {
+      "id": 175,
+      "text": "Переведите c латыни: synovialis",
+      "correct_answer": "Синовиальный"
+    },
+    {
+      "id": 176,
+      "text": "Переведите c латыни: styloides",
+      "correct_answer": "Шиловидный"
+    },
+    {
+      "id": 177,
+      "text": "Переведите c латыни: palmaris",
+      "correct_answer": "Ладонный"
+    },
+    {
+      "id": 178,
+      "text": "Переведите c латыни: medianus",
+      "correct_answer": "Срединный"
+    },
+    {
+      "id": 179,
+      "text": "Переведите c латыни: sagittalis",
+      "correct_answer": "Стреловидный"
+    },
+    {
+      "id": 180,
+      "text": "Переведите c латыни: segmentalis",
+      "correct_answer": "Сегментальный"
+    },
+    {
+      "id": 181,
+      "text": "Переведите c латыни: frontalis",
+      "correct_answer": "Фронтальный"
+    },
+    {
+      "id": 182,
+      "text": "Переведите c латыни: transversalis",
+      "correct_answer": "Поперечный"
+    },
+    {
+      "id": 183,
+      "text": "Переведите c латыни: medialis",
+      "correct_answer": "Медиальный"
+    },
+    {
+      "id": 184,
+      "text": "Переведите c латыни: lateralis",
+      "correct_answer": "Боковой"
+    },
+    {
+      "id": 185,
+      "text": "Переведите c латыни: ventralis",
+      "correct_answer": "Вентральный"
+    },
+    {
+      "id": 186,
+      "text": "Переведите c латыни: dorsalis",
+      "correct_answer": "Спинной"
+    },
+    {
+      "id": 187,
+      "text": "Переведите c латыни: cranialis",
+      "correct_answer": "Черепной"
+    },
+    {
+      "id": 188,
+      "text": "Переведите c латыни: caudalis",
+      "correct_answer": "Хвостовой"
+    },
+    {
+      "id": 189,
+      "text": "Переведите c латыни: intermedins",
+      "correct_answer": "Промежуточный"
+    },
+    {
+      "id": 190,
+      "text": "Переведите c латыни: medius",
+      "correct_answer": "Средний"
+    },
+    {
+      "id": 191,
+      "text": "Переведите c латыни: internus",
+      "correct_answer": "Внутренний"
+    },
+    {
+      "id": 192,
+      "text": "Переведите c латыни: externus",
+      "correct_answer": "Наружный"
+    },
+    {
+      "id": 193,
+      "text": "Переведите c латыни: dexter",
+      "correct_answer": "Правый"
+    },
+    {
+      "id": 194,
+      "text": "Переведите c латыни: sinister",
+      "correct_answer": "Левый"
+    },
+    {
+      "id": 195,
+      "text": "Переведите c латыни: superficialis",
+      "correct_answer": "Поверхностный"
+    },
+    {
+      "id": 196,
+      "text": "Переведите c латыни: profundus",
+      "correct_answer": "Глубокий"
+    },
+    {
+      "id": 197,
+      "text": "Переведите c латыни: longus",
+      "correct_answer": "Длинный"
+    },
+    {
+      "id": 198,
+      "text": "Переведите c латыни: mastoideus",
+      "correct_answer": "Сосцевидный"
+    },
+    {
+      "id": 199,
+      "text": "Переведите c латыни: spongiosus",
+      "correct_answer": "Губчатый"
+    },
+    {
+      "id": 200,
+      "text": "Переведите c латыни: squamosus",
+      "correct_answer": "Чешуйчатый"
+    },
+    {
+      "id": 201,
+      "text": "Переведите c латыни: fibrosus",
+      "correct_answer": "Волокнистый"
+    },
+    {
+      "id": 202,
+      "text": "Переведите c латыни: cortilagineus",
+      "correct_answer": "Хрящевой"
+    },
+    {
+      "id": 203,
+      "text": "Переведите c латыни: obliquus",
+      "correct_answer": "Косой"
+    },
+    {
+      "id": 204,
+      "text": "Переведите c латыни: osseus",
+      "correct_answer": "Костный"
+    },
+    {
+      "id": 205,
+      "text": "Переведите c латыни: palatinus",
+      "correct_answer": "Нёбный"
+    },
+    {
+      "id": 206,
+      "text": "Переведите c латыни: petrosus",
+      "correct_answer": "Каменистый"
+    },
+    {
+      "id": 207,
+      "text": "Переведите c латыни: pterygoideus",
+      "correct_answer": "Крыловидный"
+    },
+    {
+      "id": 208,
+      "text": "Переведите c латыни: alaris",
+      "correct_answer": "Крыловой"
+    },
+    {
+      "id": 209,
+      "text": "Переведите c латыни: zygomaticus",
+      "correct_answer": "Скуловой"
+    },
+    {
+      "id": 210,
+      "text": "Переведите c латыни: facialis",
+      "correct_answer": "Лицевой"
+    },
+    {
+      "id": 211,
+      "text": "Переведите c латыни: articularis",
+      "correct_answer": "Суставной"
+    },
+    {
+      "id": 212,
+      "text": "Переведите c латыни: ethmoidalis",
+      "correct_answer": "Решётчатый"
+    },
+    {
+      "id": 213,
+      "text": "Переведите c латыни: frontalis",
+      "correct_answer": "Лобный"
+    },
+    {
+      "id": 214,
+      "text": "Переведите c латыни: lacrimalis",
+      "correct_answer": "Слёзный"
+    },
+    {
+      "id": 215,
+      "text": "Переведите c латыни: occipitalis",
+      "correct_answer": "Затылочный"
+    },
+    {
+      "id": 216,
+      "text": "Переведите c латыни: orbitalis",
+      "correct_answer": "Глазничный"
+    },
+    {
+      "id": 217,
+      "text": "Переведите c латыни: horizontalis",
+      "correct_answer": "Горизонтальный"
+    },
+    {
+      "id": 218,
+      "text": "Переведите c латыни: brevis",
+      "correct_answer": "Короткий"
+    },
+    {
+      "id": 219,
+      "text": "Переведите c латыни: costalis",
+      "correct_answer": "Рёберный"
+    },
+    {
+      "id": 220,
+      "text": "Переведите c латыни: clavicularis",
+      "correct_answer": "Ключичный"
+    },
+    {
+      "id": 221,
+      "text": "Переведите c латыни: muscularis",
+      "correct_answer": "Мышечный"
+    },
+    {
+      "id": 222,
+      "text": "Переведите c латыни: vertebralis",
+      "correct_answer": "Позвоночный"
+    },
+    {
+      "id": 223,
+      "text": "Переведите c латыни: cervicalis",
+      "correct_answer": "Шейный"
+    },
+    {
+      "id": 224,
+      "text": "Переведите c латыни: lumbalis",
+      "correct_answer": "Поясничный"
+    },
+    {
+      "id": 225,
+      "text": "Переведите c латыни: nasalis",
+      "correct_answer": "Носовой"
+    },
+    {
+      "id": 226,
+      "text": "Переведите c латыни: parietalis",
+      "correct_answer": "Теменной"
+    },
+    {
+      "id": 227,
+      "text": "Переведите c латыни: sacralis",
+      "correct_answer": "Крестцовый"
+    },
+    {
+      "id": 228,
+      "text": "Переведите c латыни: sphenoidalis",
+      "correct_answer": "Клиновидный"
+    },
+    {
+      "id": 229,
+      "text": "Переведите c латыни: temporalis",
+      "correct_answer": "Височный"
+    },
+    {
+      "id": 230,
+      "text": "Переведите c латыни: superior",
+      "correct_answer": "Верхний"
+    },
+    {
+      "id": 231,
+      "text": "Переведите c латыни: inferior",
+      "correct_answer": "Нижний"
+    },
+    {
+      "id": 232,
+      "text": "Переведите c латыни: anterior",
+      "correct_answer": "Передний"
+    },
+    {
+      "id": 233,
+      "text": "Переведите c латыни: posterior",
+      "correct_answer": "Задний"
+    },
+    {
+      "id": 234,
+      "text": "Переведите c латыни: maior",
+      "correct_answer": "Большой"
+    },
+    {
+      "id": 235,
+      "text": "Переведите c латыни: minor",
+      "correct_answer": "Малый"
+    },
+    {
+      "id": 236,
+      "text": "Переведите c латыни: chroma",
+      "correct_answer": "Цвет"
+    },
+    {
+      "id": 237,
+      "text": "Переведите c латыни: albus, leucos",
+      "correct_answer": "Белый"
+    },
+    {
+      "id": 238,
+      "text": "Переведите c латыни: griseus",
+      "correct_answer": "Серый"
+    },
+    {
+      "id": 239,
+      "text": "Переведите c латыни: niger, melas",
+      "correct_answer": "Черный"
+    },
+    {
+      "id": 240,
+      "text": "Переведите c латыни: viridis",
+      "correct_answer": "Зеленый"
+    },
+    {
+      "id": 241,
+      "text": "Переведите c латыни: equus",
+      "correct_answer": "Лошадь"
+    },
+    {
+      "id": 242,
+      "text": "Переведите c латыни: vacca",
+      "correct_answer": "Корова"
+    },
+    {
+      "id": 243,
+      "text": "Переведите c латыни: bovis",
+      "correct_answer": "Бык"
+    },
+    {
+      "id": 244,
+      "text": "Переведите c латыни: sus",
+      "correct_answer": "Свинья"
+    },
+    {
+      "id": 245,
+      "text": "Переведите c латыни: canis",
+      "correct_answer": "Собака"
+    },
+    {
+      "id": 246,
+      "text": "Переведите c латыни: ovis",
+      "correct_answer": "Овца"
+    },
+    {
+      "id": 247,
+      "text": "Переведите c латыни: capra",
+      "correct_answer": "Коза"
+    },
+    {
+      "id": 248,
+      "text": "Переведите c латыни: asinus",
+      "correct_answer": "Осёл"
+    },
+    {
+      "id": 249,
+      "text": "Переведите c латыни: mus",
+      "correct_answer": "Мышь"
+    },
+    {
+      "id": 250,
+      "text": "Переведите c латыни: leo",
+      "correct_answer": "Лев"
+    },
+    {
+      "id": 251,
+      "text": "Переведите c латыни: felis",
+      "correct_answer": "Кошка"
+    },
+    {
+      "id": 252,
+      "text": "Переведите c латыни: camelus",
+      "correct_answer": "Верблюд"
+    },
+    {
+      "id": 253,
+      "text": "Переведите c латыни: lupus",
+      "correct_answer": "Волк"
+    },
+    {
+      "id": 254,
+      "text": "Переведите c латыни: anguis",
+      "correct_answer": "Змея"
+    },
+    {
+      "id": 255,
+      "text": "Переведите c латыни: cuniculus",
+      "correct_answer": "Кролик"
+    },
+    {
+      "id": 256,
+      "text": "Переведите c латыни: allergicus",
+      "correct_answer": "Аллергический"
+    },
+    {
+      "id": 257,
+      "text": "Переведите c латыни: dolorosus",
+      "correct_answer": "Болезненный"
+    },
+    {
+      "id": 258,
+      "text": "Переведите c латыни: varicosus",
+      "correct_answer": "Варикозный"
+    },
+    {
+      "id": 259,
+      "text": "Переведите c латыни: humidus",
+      "correct_answer": "Влажный"
+    },
+    {
+      "id": 260,
+      "text": "Переведите c латыни: ascendens",
+      "correct_answer": "Восходящий"
+    },
+    {
+      "id": 261,
+      "text": "Переведите c латыни: congenitus",
+      "correct_answer": "Врожденный"
+    },
+    {
+      "id": 262,
+      "text": "Переведите c латыни: purulentus",
+      "correct_answer": "Гнойный"
+    },
+    {
+      "id": 263,
+      "text": "Переведите c латыни: duplex",
+      "correct_answer": "Двойной"
+    },
+    {
+      "id": 264,
+      "text": "Переведите c латыни: benignus",
+      "correct_answer": "Доброкачественный"
+    },
+    {
+      "id": 265,
+      "text": "Переведите c латыни: naturalis",
+      "correct_answer": "Естественный"
+    },
+    {
+      "id": 266,
+      "text": "Переведите c латыни: adiposus",
+      "correct_answer": "Жировой"
+    },
+    {
+      "id": 267,
+      "text": "Переведите c латыни: malignus",
+      "correct_answer": "Злокачественный"
+    },
+    {
+      "id": 268,
+      "text": "Переведите c латыни: infectiosus",
+      "correct_answer": "Инфекционный"
+    },
+    {
+      "id": 269,
+      "text": "Переведите c латыни: verus",
+      "correct_answer": "Истинный"
+    },
+    {
+      "id": 270,
+      "text": "Переведите c латыни: spurius",
+      "correct_answer": "Ложный"
+    },
+    {
+      "id": 271,
+      "text": "Переведите c латыни: descendens",
+      "correct_answer": "Нисходящий"
+    },
+    {
+      "id": 272,
+      "text": "Переведите c латыни: complicatus",
+      "correct_answer": "Осложненный"
+    },
+    {
+      "id": 273,
+      "text": "Переведите c латыни: acutus",
+      "correct_answer": "Острый"
+    },
+    {
+      "id": 274,
+      "text": "Переведите c латыни: primarius",
+      "correct_answer": "Первичный"
+    },
+    {
+      "id": 275,
+      "text": "Переведите c латыни: intermittens",
+      "correct_answer": "Перемежающийся"
+    },
+    {
+      "id": 276,
+      "text": "Переведите c латыни: alimentarius",
+      "correct_answer": "Пищевой"
+    },
+    {
+      "id": 277,
+      "text": "Переведите c латыни: planus",
+      "correct_answer": "Плоский"
+    },
+    {
+      "id": 278,
+      "text": "Переведите c латыни: praematurus",
+      "correct_answer": "Преждевременный"
+    },
+    {
+      "id": 279,
+      "text": "Переведите c латыни: simplex",
+      "correct_answer": "Простой"
+    },
+    {
+      "id": 280,
+      "text": "Переведите c латыни: diffusus",
+      "correct_answer": "Разлитой"
+    },
+    {
+      "id": 281,
+      "text": "Переведите c латыни: latens",
+      "correct_answer": "Скрытый"
+    },
+    {
+      "id": 282,
+      "text": "Переведите c латыни: compositus",
+      "correct_answer": "Сложный"
+    },
+    {
+      "id": 283,
+      "text": "Переведите c латыни: siccus",
+      "correct_answer": "Сухой"
+    },
+    {
+      "id": 284,
+      "text": "Переведите c латыни: traumaticus",
+      "correct_answer": "Травматический"
+    },
+    {
+      "id": 285,
+      "text": "Переведите c латыни: functionalis",
+      "correct_answer": "Функциональный"
+    },
+    {
+      "id": 286,
+      "text": "Переведите c латыни: chronicus",
+      "correct_answer": "Хронический"
+    },
+    {
+      "id": 287,
+      "text": "Переведите c латыни: epidemicus",
+      "correct_answer": "Эпидемический"
+    },
+    {
+      "id": 288,
+      "text": "Переведите c латыни: toxicus",
+      "correct_answer": "Ядовитый"
+    },
+    {
+      "id": 289,
+      "text": "Переведите c латыни: -pathia",
+      "correct_answer": "Патия"
+    },
+    {
+      "id": 290,
+      "text": "Переведите c латыни: -algia",
+      "correct_answer": "Боль"
+    },
+    {
+      "id": 291,
+      "text": "Переведите c латыни: stenosis",
+      "correct_answer": "Сужение"
+    },
+    {
+      "id": 292,
+      "text": "Переведите c латыни: -ectasia",
+      "correct_answer": "Эктазия"
+    },
+    {
+      "id": 293,
+      "text": "Переведите c латыни: -ptosis",
+      "correct_answer": "Птоз"
+    },
+    {
+      "id": 294,
+      "text": "Переведите c латыни: -sclerosis",
+      "correct_answer": "Склероз"
+    },
+    {
+      "id": 295,
+      "text": "Переведите c латыни: -philia",
+      "correct_answer": "Филия"
+    },
+    {
+      "id": 296,
+      "text": "Переведите c латыни: -osis",
+      "correct_answer": "Оз"
+    },
+    {
+      "id": 297,
+      "text": "Переведите c латыни: -iasis",
+      "correct_answer": "Оз"
+    },
+    {
+      "id": 298,
+      "text": "Переведите c латыни: -phobia",
+      "correct_answer": "Боязнь"
+    },
+    {
+      "id": 299,
+      "text": "Переведите c латыни: -tonia",
+      "correct_answer": "Напряжение"
+    },
+    {
+      "id": 300,
+      "text": "Переведите c латыни: abscessus",
+      "correct_answer": "Абсцесс"
+    },
+    {
+      "id": 301,
+      "text": "Переведите c латыни: caries",
+      "correct_answer": "Кариес"
+    },
+    {
+      "id": 302,
+      "text": "Переведите c латыни: caecitas",
+      "correct_answer": "Слепота"
+    },
+    {
+      "id": 303,
+      "text": "Переведите c латыни: cirrhosis",
+      "correct_answer": "Цирроз"
+    },
+    {
+      "id": 304,
+      "text": "Переведите c латыни: compressio",
+      "correct_answer": "Сдавление"
+    },
+    {
+      "id": 305,
+      "text": "Переведите c латыни: contusio",
+      "correct_answer": "Ушиб"
+    },
+    {
+      "id": 306,
+      "text": "Переведите c латыни: dolor",
+      "correct_answer": "Боль"
+    },
+    {
+      "id": 307,
+      "text": "Переведите c латыни: emesis",
+      "correct_answer": "Рвота"
+    },
+    {
+      "id": 308,
+      "text": "Переведите c латыни: febris",
+      "correct_answer": "Лихорадка"
+    },
+    {
+      "id": 309,
+      "text": "Переведите c латыни: graviditas",
+      "correct_answer": "Беременность"
+    },
+    {
+      "id": 310,
+      "text": "Переведите c латыни: diarrhoea",
+      "correct_answer": "Понос"
+    },
+    {
+      "id": 311,
+      "text": "Переведите c латыни: dilatatio",
+      "correct_answer": "Расширение"
+    },
+    {
+      "id": 312,
+      "text": "Переведите c латыни: fractura",
+      "correct_answer": "Перелом"
+    },
+    {
+      "id": 313,
+      "text": "Переведите c латыни: hydrops",
+      "correct_answer": "Водянка"
+    },
+    {
+      "id": 314,
+      "text": "Переведите c латыни: icterus",
+      "correct_answer": "Желтуха"
+    },
+    {
+      "id": 315,
+      "text": "Переведите c латыни: ileus",
+      "correct_answer": "Непроходимость кишечника"
+    },
+    {
+      "id": 316,
+      "text": "Переведите c латыни: incarceratio",
+      "correct_answer": "Ущемление"
+    },
+    {
+      "id": 317,
+      "text": "Переведите c латыни: infarctus",
+      "correct_answer": "Инфаркт"
+    },
+    {
+      "id": 318,
+      "text": "Переведите c латыни: oedema",
+      "correct_answer": "Отек"
+    },
+    {
+      "id": 319,
+      "text": "Переведите c латыни: paralysis",
+      "correct_answer": "Паралич"
+    },
+    {
+      "id": 320,
+      "text": "Переведите c латыни: prolapsus",
+      "correct_answer": "Выпадение"
+    },
+    {
+      "id": 321,
+      "text": "Переведите c латыни: pruritus",
+      "correct_answer": "Зуд"
+    },
+    {
+      "id": 322,
+      "text": "Переведите c латыни: -resectio",
+      "correct_answer": "Частичное удаление"
+    },
+    {
+      "id": 323,
+      "text": "Переведите c латыни: ruptura",
+      "correct_answer": "Разрыв"
+    },
+    {
+      "id": 324,
+      "text": "Переведите c латыни: torsio",
+      "correct_answer": "Скручивание"
+    },
+    {
+      "id": 325,
+      "text": "Переведите c латыни: vitium",
+      "correct_answer": "Порок"
+    },
+    {
+      "id": 326,
+      "text": "Переведите c латыни: vulnus",
+      "correct_answer": "Рана"
+    },
+    {
+      "id": 327,
+      "text": "Переведите c латыни: palpatio",
+      "correct_answer": "Обследование путем ощупывания"
+    },
+    {
+      "id": 328,
+      "text": "Переведите c латыни: percussio",
+      "correct_answer": "Обследование путем выстукивания"
+    },
+    {
+      "id": 329,
+      "text": "Переведите c латыни: auscultatio",
+      "correct_answer": "Обследование путем выслушивания"
+    },
+    {
+      "id": 330,
+      "text": "Переведите c латыни: -termia",
+      "correct_answer": "Температура"
+    },
+    {
+      "id": 331,
+      "text": "Переведите c латыни: -metria",
+      "correct_answer": "Измерение"
+    },
+    {
+      "id": 332,
+      "text": "Переведите c латыни: -aemia",
+      "correct_answer": "В крови"
+    },
+    {
+      "id": 333,
+      "text": "Переведите c латыни: -uria",
+      "correct_answer": "В моче"
+    },
+    {
+      "id": 334,
+      "text": "Переведите c латыни: -scopia",
+      "correct_answer": "Наблюдение, визуальное изучение"
+    },
+    {
+      "id": 335,
+      "text": "Переведите c латыни: therapia",
+      "correct_answer": "Лечение"
+    },
+    {
+      "id": 336,
+      "text": "Переведите c латыни: iatria",
+      "correct_answer": "Лечение"
+    },
+    {
+      "id": 337,
+      "text": "Переведите c латыни: iatros",
+      "correct_answer": "Врач"
+    },
+    {
+      "id": 338,
+      "text": "Переведите c латыни: -tomia",
+      "correct_answer": "Рассечение"
+    },
+    {
+      "id": 339,
+      "text": "Переведите c латыни: -stomia",
+      "correct_answer": "Образование искусственного отверстия"
+    },
+    {
+      "id": 340,
+      "text": "Переведите c латыни: -ectomia",
+      "correct_answer": "Удаление всего органа"
+    },
+    {
+      "id": 341,
+      "text": "Переведите c латыни: -resectio",
+      "correct_answer": "Удаление части органа"
+    },
+    {
+      "id": 342,
+      "text": "Переведите c латыни: amputatio",
+      "correct_answer": "Отсечение"
+    },
+    {
+      "id": 343,
+      "text": "Переведите c латыни: perforatio",
+      "correct_answer": "Прорыв стенки органа"
+    },
+    {
+      "id": 344,
+      "text": "Переведите c латыни: -tonia",
+      "correct_answer": "Мышечное напряжение"
+    },
+    {
+      "id": 345,
+      "text": "Переведите c латыни: -trophia",
+      "correct_answer": "Питание"
+    },
+    {
+      "id": 346,
+      "text": "Переведите c латыни: -stenia",
+      "correct_answer": "Сила"
+    },
+    {
+      "id": 347,
+      "text": "Переведите c латыни: -plasia",
+      "correct_answer": "Образование"
+    },
+    {
+      "id": 348,
+      "text": "Переведите c латыни: -penia",
+      "correct_answer": "Недостаток"
+    },
+    {
+      "id": 349,
+      "text": "Переведите c латыни: -philia",
+      "correct_answer": "Предрасположенность к..."
+    }
+  ]
+}

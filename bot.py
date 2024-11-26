@@ -127,7 +127,7 @@ class UserSession:
                 del self.data['last_question']
                 logger.info(f"Cleared last_question for user {self.user_info}")
                 self.save_session()
-                
+
     def reset_session(self):
         with self.lock:            
             # Delete session file
@@ -891,7 +891,6 @@ def handle_answer_callback(call):
         new_text = (
             f"Варианты ответов:\n"
             f"{chr(10).join(options_text)}\n\n"
-            f"Выберите номер правильного варианта."
         )
         
         try:
@@ -928,30 +927,33 @@ def handle_answer_callback(call):
                 f"Правильный — *{correct_answer.lower()}*.\n\n"
             )
             
-            response += f"{chr(10).join(question_data['explanation'])}\n\n"
+            if question_data and 'explanation' in question_data:
+                response += f"{chr(10).join(question_data['explanation'])}\n\n"
             
-            wrong_answer_file_path = os.path.join('questions', selected_answer_data['files'][0])
-            if "mp3" in wrong_answer_file_path or "ogg" in wrong_answer_file_path:
-                response += f"\nА вот как звучит *{selected_answer.lower()}*:"
-                bot.send_message(call.message.chat.id, response, parse_mode="Markdown")
-                print(f"Sending audio file: {wrong_answer_file_path}")
-                try:
-                    with open(wrong_answer_file_path, 'rb') as audio:
-                        bot.send_voice(call.message.chat.id, audio)
-                except Exception as e:
-                    logger.error(f"Failed to send audio file {wrong_answer_file_path} for user {user_info}: {e}")
-            if "jpg" in wrong_answer_file_path or "png" in wrong_answer_file_path:
-                response += f"\nА вот как выглядит *{selected_answer.lower()}*:"
-                bot.send_message(call.message.chat.id, response, parse_mode="Markdown")
-                print(f"Sending image file: {wrong_answer_file_path}")
-                try:
-                    with open(wrong_answer_file_path, 'rb') as file:
-                        bot.send_photo(call.message.chat.id, file)
-                except Exception as e:
-                    logger.error(f"Failed to send image file {wrong_answer_file_path} for user {user_info}: {e}")
+            if selected_answer_data and 'files' in selected_answer_data:
+                wrong_answer_file_path = os.path.join('questions', selected_answer_data['files'][0])
+                if "mp3" in wrong_answer_file_path or "ogg" in wrong_answer_file_path:
+                    response += f"\nА вот как звучит *{selected_answer.lower()}*:"
+                    bot.send_message(call.message.chat.id, response, parse_mode="Markdown")
+                    print(f"Sending audio file: {wrong_answer_file_path}")
+                    try:
+                        with open(wrong_answer_file_path, 'rb') as audio:
+                            bot.send_voice(call.message.chat.id, audio)
+                    except Exception as e:
+                        logger.error(f"Failed to send audio file {wrong_answer_file_path} for user {user_info}: {e}")
+                if "jpg" in wrong_answer_file_path or "png" in wrong_answer_file_path:
+                    response += f"\nА вот как выглядит *{selected_answer.lower()}*:"
+                    bot.send_message(call.message.chat.id, response, parse_mode="Markdown")
+                    print(f"Sending image file: {wrong_answer_file_path}")
+                    try:
+                        with open(wrong_answer_file_path, 'rb') as file:
+                            bot.send_photo(call.message.chat.id, file)
+                    except Exception as e:
+                        logger.error(f"Failed to send image file {wrong_answer_file_path} for user {user_info}: {e}")
 
-
-            response = f"\n{chr(10).join(selected_answer_data['explanation'])}"
+            if selected_answer_data and 'explanation' in selected_answer_data:
+                response += f"\n{chr(10).join(selected_answer_data['explanation'])}"
+            
             bot.send_message(call.message.chat.id, response, parse_mode="Markdown", reply_markup=keyboard)
 
         bot.answer_callback_query(call.id)
