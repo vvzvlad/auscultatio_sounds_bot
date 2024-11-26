@@ -32,7 +32,14 @@ logger = logging.getLogger(__name__)
 sessions = {}
 sessions_lock = threading.Lock()
 
-bot = telebot.TeleBot(os.getenv('BOT_TOKEN'))
+def get_position_emoji(position: int) -> str:
+    emojis = ["", "🥇", "🥈", "🥉"]
+    return emojis[position] if 1 <= position <= 3 else ""
+
+def get_number_emoji(number: int) -> str:
+    emojis = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
+    return emojis[number - 1] if 1 <= number <= 10 else str(number)
+
 
 def get_user_info(user) -> str:
     """Helper function to get user info for logs"""
@@ -72,7 +79,7 @@ class UserSession:
 
         # Always update user info in data
         self.data.update({ 'user_id': self.user_id, 'user_name': self.user_name, 'last_update': time.time() })
-        self._save_session()  # Save immediately to ensure user data is stored
+        self.save_session()  # Save immediately to ensure user data is stored
 
         try:
             self.question_selector = QuestionSelector()
@@ -81,9 +88,12 @@ class UserSession:
             logger.error(f"Failed to initialize QuestionSelector for user {self.user_info}: {e}")
             raise
 
-    def _save_session(self):
+    def save_session(self):
         """Save session data to file"""
         try:
+            # Ensure directory exists
+            self.session_file.parent.mkdir(parents=True, exist_ok=True)
+            
             with open(self.session_file, 'w', encoding='utf-8') as f:
                 json.dump(self.data, f, ensure_ascii=False, indent=2)
             logger.info(f"Saved session data for user {self.user_info}")
@@ -94,7 +104,7 @@ class UserSession:
         with self.lock:
             self.data['last_question'] = question
             logger.info(f"Set last question for user {self.user_info}: Question ID {question['question_id']}")
-            self._save_session()
+            self.save_session()
 
     def get_last_question(self) -> Dict[str, Any]:
         with self.lock:
@@ -105,16 +115,21 @@ class UserSession:
             if 'last_question' in self.data:
                 del self.data['last_question']
                 logger.info(f"Cleared last_question for user {self.user_info}")
-                self._save_session()
-
+                self.save_session()
     def reset_session(self):
-        with self.lock:
-            # Keep the theme when resetting session
-            current_theme = self.data.get('current_theme')
-            self.data = {}
-            if current_theme: self.data['current_theme'] = current_theme
-            logger.info(f"Session reset for user {self.user_info}")
-            self._save_session()
+        with self.lock:            
+            # Delete session file
+            try:
+                if self.session_file.exists():
+                    self.session_file.unlink()
+                    logger.info(f"Deleted session file for user {self.user_info}")
+            except Exception as e:
+                logger.error(f"Failed to delete session file for user {self.user_info}: {e}")
+
+        # Reset session data
+        self.data = {}
+        logger.info(f"Session reset for user {self.user_info}")
+        self.save_session()
 
     def update_question_stats(self, question_id: int, is_correct: bool, theme: str):
         """Update statistics for the given question"""
@@ -145,7 +160,7 @@ class UserSession:
                 f"total={theme_stats['question_stats'][q_id]['total']}, "
                 f"correct={theme_stats['question_stats'][q_id]['correct']}"
             )
-            self._save_session()
+            self.save_session()
 
     def get_statistics(self):
         """Get detailed statistics for all themes"""
@@ -159,7 +174,7 @@ class UserSession:
                 stats = theme_stats.get(theme_tag, {'total': 0, 'correct': 0, 'question_stats': {}})
                 
                 if stats['total'] > 0:
-                    theme_percentage = (stats['correct'] / stats['total']) * 100
+                    theme_percentage = (stats['correct'] / stats['total']) * 100 if stats['total'] > 0 else 0
                     
                     # Get per-question stats for this theme
                     question_stats = []
@@ -194,12 +209,58 @@ class UserSession:
         with self.lock:
             self.data['current_theme'] = theme
             logger.info(f"Set theme for user {self.user_info}: {theme}")
-            self._save_session()
+            self.save_session()
 
     def get_theme(self) -> str:
         """Get current theme from user data"""
         with self.lock:
             return self.data.get('current_theme')
+
+def validate_theme_data(theme_data):
+    """Validate theme data structure"""
+    # Check required top-level fields
+    required_fields = ['tag', 'name', 'questions']
+    for field in required_fields:
+        if field not in theme_data:
+            raise ValueError(f"Missing required field '{field}' in theme data")
+            
+    # Validate questions array
+    if not isinstance(theme_data['questions'], list):
+        raise ValueError("'questions' must be an array")
+        
+    # Validate each question
+    for question in theme_data['questions']:
+        # Check required question fields
+        required_question_fields = ['id', 'text', 'correct_answer']
+        for field in required_question_fields:
+            if field not in question:
+                raise ValueError(f"Question missing required field '{field}'")
+                
+        # Validate ID is integer
+        if not isinstance(question['id'], int):
+            raise ValueError(f"Question ID must be an integer, got {type(question['id'])}")
+            
+        # Validate text and correct_answer are strings
+        if not isinstance(question['text'], str):
+            raise ValueError(f"Question text must be a string, got {type(question['text'])}")
+        if not isinstance(question['correct_answer'], str):
+            raise ValueError(f"Question correct_answer must be a string, got {type(question['correct_answer'])}")
+            
+        # Validate audio_paths if present
+        if 'audio_paths' in question:
+            if not isinstance(question['audio_paths'], list):
+                raise ValueError("audio_paths must be an array")
+            for path in question['audio_paths']:
+                if not isinstance(path, str):
+                    raise ValueError(f"Audio path must be a string, got {type(path)}")
+                    
+        # Validate explanation if present
+        if 'explanation' in question:
+            if not isinstance(question['explanation'], list):
+                raise ValueError("explanation must be an array")
+            for exp in question['explanation']:
+                if not isinstance(exp, str):
+                    raise ValueError(f"Explanation must be a string, got {type(exp)}")
 
 class QuestionSelector:
     def __init__(self):
@@ -216,10 +277,17 @@ class QuestionSelector:
             logger.error(f"Audio folder not found at {audio_folder.absolute()}")
             raise ValueError(f"Audio folder not found at {audio_folder.absolute()}")
         
+        # Track question IDs across all themes
+        seen_question_ids = set()
+        
         for file_path in theme_files:
             try:
                 with open(file_path, 'r', encoding='utf-8') as f:
                     theme_data = json.load(f)
+                    
+                    # Validate theme data structure
+                    validate_theme_data(theme_data)
+                    
                     theme_tag = theme_data.get('tag')
                     if not theme_tag:
                         logger.warning(f"No tag found in {file_path}, using filename")
@@ -229,12 +297,21 @@ class QuestionSelector:
                     missing_files = self._check_audio_files(theme_data.get('questions', []))
                     if missing_files:
                         files_str = "\n".join(f"- {f}" for f in missing_files)
-                        logger.error( f"Missing audio files for theme '{theme_tag}':\n{files_str}" )
-                        raise ValueError( f"Missing audio files for theme '{theme_tag}':\n{files_str}" )
+                        logger.error(f"Missing audio files for theme '{theme_tag}':\n{files_str}")
+                        raise ValueError(f"Missing audio files for theme '{theme_tag}':\n{files_str}")
+                    
+                    # Check for duplicate question IDs
+                    questions = theme_data.get('questions', [])
+                    for question in questions:
+                        question_id = question.get('id')
+                        if question_id in seen_question_ids:
+                            logger.error(f"Duplicate question ID {question_id} found in theme '{theme_tag}'")
+                            raise ValueError(f"Duplicate question ID {question_id} found in theme '{theme_tag}'")
+                        seen_question_ids.add(question_id)
                     
                     self.themes[theme_tag] = {
                         'name': theme_data.get('name', theme_tag),
-                        'questions': theme_data.get('questions', [])
+                        'questions': questions
                     }
                 logger.info(f"Loaded {len(self.themes[theme_tag]['questions'])} questions for theme '{theme_tag}' ({self.themes[theme_tag]['name']})")
             except Exception as e:
@@ -292,13 +369,13 @@ class QuestionSelector:
             logger.debug(f"Selected audio file {audio_file} for question {question['id']}")
 
         # Get all other answers from current theme only
-        other_answers = [ q['correct_answer'] for q in theme_data['questions'] if q['id'] != question['id'] ]
-        logger.debug(f"Found {len(other_answers)} other answers")
-
+        other_answers = [ q['correct_answer'] for q in theme_data['questions'] 
+                        if q['id'] != question['id']]
+        
         if len(other_answers) < num_options - 1:
-            logger.error(f"Not enough questions to generate {num_options} options")
-            raise ValueError("Not enough questions to generate the desired number of options.")
-
+            num_options = len(other_answers) + 1  # Reduce options if not enough questions
+            logger.warning(f"Not enough questions in theme '{self.current_theme}'. Reducing options to {num_options}")
+        
         wrong_answers = random.sample(other_answers, num_options - 1)
         options = wrong_answers + [correct_answer]
         random.shuffle(options)
@@ -332,6 +409,10 @@ class QuestionSelector:
 
 def get_session(user) -> UserSession:
     with sessions_lock:
+        if user is None:
+            logger.error("User object is None")
+            raise ValueError("User object cannot be None")
+        
         if user.id not in sessions:
             logger.info(f"Creating/loading session for user {get_user_info(user)}")
             session = UserSession(user)
@@ -355,22 +436,41 @@ def signal_handler(signum, frame):
 signal.signal(signal.SIGINT, signal_handler)
 signal.signal(signal.SIGTERM, signal_handler)
 
-def get_number_emoji(number: int) -> str:
-    """Convert number to emoji representation"""
-    emojis = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
-    return emojis[number - 1] if 1 <= number <= 10 else str(number)
-
-
+def get_question_from_themes(themes, search_key, search_value):
+    iterator = (q for theme in themes.values() 
+                for q in theme['questions'] 
+                if q[search_key] == search_value
+        )
+    return next(iterator, None)
 
 def generate_and_send_question(session, chat_id, user_info):
     """Helper function to generate and send a question to user"""
     try:
+        # Check if theme is selected
+        current_theme = session.question_selector.current_theme
+        if not current_theme:
+            # Create keyboard with theme buttons
+            keyboard = types.InlineKeyboardMarkup(row_width=1)
+            themes = session.question_selector.get_themes()
+            for theme in themes:
+                button = types.InlineKeyboardButton(
+                    text=theme['name'],
+                    callback_data=f"theme:{theme['tag']}"
+                )
+                keyboard.add(button)
+            bot.send_message(chat_id, "Тематика не выбрана. Выберите своего бойца:", reply_markup=keyboard)
+            return False
+            
         question = session.question_selector.get_random_question()
         logger.info(f"Generated question {question['question_id']} for user {user_info}")
 
         # Try to send audio first to check permissions
         if question.get('audio_file'):
             audio_path = os.path.join('audio', question['audio_file'])
+            if not os.path.exists(audio_path):
+                logger.error(f"Audio file not found: {audio_path}")
+                bot.send_message(chat_id, "Не удалось найти аудиофайл")
+                return False
             try:
                 with open(audio_path, 'rb') as audio:
                     bot.send_voice(chat_id, audio)
@@ -468,6 +568,8 @@ def handle_all_messages(message):
         logger.error(f"Unexpected error handling message from user {user_info}: {e}", exc_info=True)
         bot.send_message(message.chat.id, f"Произошла непредвиденная ошибка: {e}")
 
+
+        
 def get_global_stats(theme: str = None):
     """Get global statistics across all users for specific theme or all themes"""
     user_stats = []
@@ -495,7 +597,8 @@ def get_global_stats(theme: str = None):
                     total += t_stats.get('total', 0)
                     correct += t_stats.get('correct', 0)
                 if total > 0:
-                    user_stats.append({ 'user_id': user_id, 'user_name': user_name, 'total': total, 'correct': correct })
+                    percentage = (correct / total) * 100 if total > 0 else 0
+                    user_stats.append({ 'user_id': user_id, 'user_name': user_name, 'total': total, 'correct': correct, 'percentage': percentage })
                     
         except Exception as e:
             logger.error(f"Failed to load stats from {session_file}: {e}")
@@ -503,10 +606,6 @@ def get_global_stats(theme: str = None):
     
     # Sort users by correct answers (desc) and then by total answers (desc)
     return sorted( user_stats, key=lambda x: (x['correct'], x['total']), reverse=True )
-
-def get_position_emoji(position: int) -> str:
-    emojis = ["", "🥇", "🥈", "🥉"]
-    return emojis[position] if 1 <= position <= 3 else ""
 
 @bot.callback_query_handler(func=lambda call: call.data == "global_stats")
 def handle_global_stats_callback(call):
@@ -517,8 +616,6 @@ def handle_global_stats_callback(call):
     try:
         session = get_session(user)
         current_theme = session.get_theme()
-        
-        # Get global stats for current theme
         stats = get_global_stats(current_theme)
         
         if not stats:
@@ -526,7 +623,6 @@ def handle_global_stats_callback(call):
             bot.answer_callback_query(call.id)
             return
             
-        # Format response
         theme_name = session.question_selector.themes[current_theme]['name']
         response = f"🏆 Рейтинг по тематике {theme_name}\n\n"
         
@@ -565,7 +661,6 @@ def handle_stats_callback(call):
         stats = session.get_statistics()
         current_theme = session.get_theme()
         
-        # Get global stats to find user's position
         global_stats = get_global_stats(current_theme)
         user_position = next( (i for i, stat in enumerate(global_stats, 1)  if str(user.id) == stat['user_id']), None )
         
@@ -639,28 +734,36 @@ def handle_next_callback(call):
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith("theme:"))
 def handle_theme_callback(call):
-    user = call.from_user
-    user_info = get_user_info(user)
-    session = get_session(user)
-    theme = call.data.split(":")[1]
-
-    if session.question_selector.set_theme(theme):
-        session.set_theme(theme)  # Save theme to user profile
-        theme_info = session.question_selector.get_current_theme()
+    try:
+        user = call.from_user
+        user_info = get_user_info(user)
+        session = get_session(user)
         
-        # Update and save user info
-        session.data.update({ 'user_id': user.id, 'user_name': user.username or user.first_name, 'last_update': time.time() })
-        session._save_session()
-        
-        response = f"Выбрана {theme_info['name'].lower()}."
-    else:
-        response = f"Ошибка при выборе тематики: {theme} не найдена"
+        theme_parts = call.data.split(":")
+        if len(theme_parts) != 2:
+            logger.error(f"Invalid theme callback data format: {call.data}")
+            bot.answer_callback_query(call.id, "Неверный формат данных")
+            return
+            
+        theme = theme_parts[1]
 
-    bot.send_message(call.message.chat.id, response)
-    # Generate new question after theme change
-    generate_and_send_question(session, call.message.chat.id, user_info)
-    bot.answer_callback_query(call.id)
-    return
+        if session.question_selector.set_theme(theme):
+            session.set_theme(theme)  # Save theme to user profile
+            session.data.update({ 'user_id': user.id, 'user_name': user.username or user.first_name, 'last_update': time.time() })
+            session.save_session()
+            
+            theme_info = session.question_selector.get_current_theme()
+            response = f"Выбрана {theme_info['name'].lower()}."
+        else:
+            response = f"Ошибка при выборе тематики: {theme} не найдена"
+
+        bot.send_message(call.message.chat.id, response)
+        # Generate new question after theme change
+        generate_and_send_question(session, call.message.chat.id, user_info)
+        bot.answer_callback_query(call.id)
+    except Exception as e:
+        logger.error(f"Error in theme callback: {e}")
+        bot.answer_callback_query(call.id, "Произошла ошибка при выборе темы")
 
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith("answer:"))
@@ -673,9 +776,14 @@ def handle_answer_callback(call):
         session = get_session(user)
         
         # Parse question_id and selected_option
-        _, question_id, selected_option = call.data.split(':')
-        question_id = int(question_id)
-        selected_option = int(selected_option)
+        try:
+            _, question_id, selected_option = call.data.split(':')
+            question_id = int(question_id)
+            selected_option = int(selected_option)
+        except (ValueError, IndexError) as e:
+            logger.error(f"Invalid callback data format: {call.data}")
+            bot.answer_callback_query(call.id, "Неверный формат данных.")
+            return
 
         last_question = session.get_last_question()
         if not last_question or last_question.get('question_id') != question_id:
@@ -689,22 +797,11 @@ def handle_answer_callback(call):
         options = last_question.get('options', [])
         selected_answer = options[selected_option - 1]
         correct_answer = options[correct_option - 1]
-        
-        # Get question data for explanations
-        question_data = next(
-            (q for theme in session.question_selector.themes.values() 
-            for q in theme['questions'] 
-            if q['id'] == question_id),
-            None
-        )
 
-        # Get selected answer data
-        selected_answer_data = next(
-            (q for theme in session.question_selector.themes.values() 
-            for q in theme['questions'] 
-            if q['correct_answer'] == selected_answer),
-            None
-        )
+        # Get question data for explanations
+        themes = session.question_selector.themes
+        question_data = get_question_from_themes( themes,  'id',  question_id )
+        selected_answer_data = get_question_from_themes( themes, 'correct_answer', selected_answer )
 
         # Mark selected button with ✅ or ❌ and show correct answer
         options = last_question.get('options', [])
@@ -787,13 +884,18 @@ def handle_answer_callback(call):
 
             # Send audio of the wrong answer
             if selected_answer_data and selected_answer_data.get('audio_paths'):
-                audio_path = os.path.join('audio', selected_answer_data['audio_paths'][0])
-                try:
-                    with open(audio_path, 'rb') as audio:
-                        bot.send_voice(call.message.chat.id, audio)
-                except Exception as e:
-                    logger.error(f"Failed to send audio file {audio_path} for user {user_info}: {e}")
-                    bot.send_message(call.message.chat.id, "Не удалось отправить аудиофайл")
+                audio_file_name = selected_answer_data['audio_paths'][0]
+                audio_path = os.path.join('audio', audio_file_name)
+                if os.path.exists(audio_path):
+                    try:
+                        with open(audio_path, 'rb') as audio:
+                            bot.send_voice(call.message.chat.id, audio)
+                    except Exception as e:
+                        logger.error(f"Failed to send audio file {audio_path} for user {user_info}: {e}")
+                        bot.send_message(call.message.chat.id, "Не удалось отправить аудиофайл.")
+                else:
+                    logger.error(f"Audio file does not exist: {audio_path}")
+                    bot.send_message(call.message.chat.id, "Аудиофайл не найден.")
 
             # Send wrong answer explanation with buttons
             if selected_answer_data and 'explanation' in selected_answer_data:
@@ -808,11 +910,10 @@ def handle_answer_callback(call):
 
     except Exception as e:
         logger.error(f"Error handling answer callback from user {user_info}: {e}", exc_info=True)
-        bot.send_message(call.message.chat.id, f"Произошла ошибка: {e}")
-        bot.answer_callback_query(call.id, "Произошла ошибка.")
+        bot.send_message(call.message.chat.id, f"Произошла чудовищная ошибка: {e}")
+        bot.answer_callback_query(call.id, "Произошла чудовищная ошибка.")
 
-        
-class CodeChangeHandler(FileSystemEventHandler)
+class CodeChangeHandler(FileSystemEventHandler):
     def __init__(self):
         self.last_modified = time.time()
         
@@ -826,10 +927,19 @@ class CodeChangeHandler(FileSystemEventHandler)
             if current_time - self.last_modified > 1:  # Prevent multiple reloads
                 self.last_modified = current_time
                 logger.info(f"Change detected in {event.src_path}. Restarting bot...")
-                os.execv(sys.executable, ['python'] + sys.argv)
+                try:
+                    os.execv(sys.executable, [sys.executable] + sys.argv)
+                except Exception as e:
+                    logger.error(f"Failed to restart bot: {e}")
 
 if __name__ == '__main__':
     logger.info("Starting bot...")
+    bot_token = os.getenv('BOT_TOKEN')
+    if not bot_token:
+        logger.error("BOT_TOKEN environment variable is not set.")
+        sys.exit("Error: BOT_TOKEN environment variable is not set.")
+    bot = telebot.TeleBot(bot_token)
+
     
     # Set up file watcher
     event_handler = CodeChangeHandler()
