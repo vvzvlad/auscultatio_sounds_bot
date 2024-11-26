@@ -71,11 +71,7 @@ class UserSession:
             self.data = {}
 
         # Always update user info in data
-        self.data.update({
-            'user_id': self.user_id,
-            'user_name': self.user_name,
-            'last_update': time.time()
-        })
+        self.data.update({ 'user_id': self.user_id, 'user_name': self.user_name, 'last_update': time.time() })
         self._save_session()  # Save immediately to ensure user data is stored
 
         try:
@@ -116,8 +112,7 @@ class UserSession:
             # Keep the theme when resetting session
             current_theme = self.data.get('current_theme')
             self.data = {}
-            if current_theme:
-                self.data['current_theme'] = current_theme
+            if current_theme: self.data['current_theme'] = current_theme
             logger.info(f"Session reset for user {self.user_info}")
             self._save_session()
 
@@ -129,11 +124,7 @@ class UserSession:
             
             # Initialize theme stats if not exists
             if theme not in self.data['theme_stats']:
-                self.data['theme_stats'][theme] = {
-                    'question_stats': {},
-                    'total': 0,
-                    'correct': 0
-                }
+                self.data['theme_stats'][theme] = { 'question_stats': {}, 'total': 0, 'correct': 0 }
             
             theme_stats = self.data['theme_stats'][theme]
             
@@ -237,14 +228,9 @@ class QuestionSelector:
                     # Check audio files before adding theme
                     missing_files = self._check_audio_files(theme_data.get('questions', []))
                     if missing_files:
-                        logger.error(
-                            f"Missing audio files for theme '{theme_tag}':\n" + 
-                            "\n".join(f"- {f}" for f in missing_files)
-                        )
-                        raise ValueError(
-                            f"Missing audio files for theme '{theme_tag}':\n" + 
-                            "\n".join(f"- {f}" for f in missing_files)
-                        )
+                        files_str = "\n".join(f"- {f}" for f in missing_files)
+                        logger.error( f"Missing audio files for theme '{theme_tag}':\n{files_str}" )
+                        raise ValueError( f"Missing audio files for theme '{theme_tag}':\n{files_str}" )
                     
                     self.themes[theme_tag] = {
                         'name': theme_data.get('name', theme_tag),
@@ -276,10 +262,7 @@ class QuestionSelector:
 
     def get_current_theme(self) -> Dict[str, str]:
         if self.current_theme:
-            return {
-                'tag': self.current_theme,
-                'name': self.themes[self.current_theme]['name']
-            }
+            return { 'tag': self.current_theme, 'name': self.themes[self.current_theme]['name'] }
         return None
 
     def get_random_question(self, num_options: int = 4) -> Dict[str, Any]:
@@ -289,7 +272,7 @@ class QuestionSelector:
 
         if not self.current_theme:
             logger.error("No theme selected")
-            raise ValueError("Тема не выбрана. Пожалуйста, нажмите /start и выберите тему.")
+            raise ValueError("Тематика не выбрана. Пожалуйста, нажмите /start")
             
         theme_data = self.themes[self.current_theme]
         questions = theme_data['questions']
@@ -309,11 +292,7 @@ class QuestionSelector:
             logger.debug(f"Selected audio file {audio_file} for question {question['id']}")
 
         # Get all other answers from current theme only
-        other_answers = [
-            q['correct_answer']
-            for q in theme_data['questions']
-            if q['id'] != question['id']
-        ]
+        other_answers = [ q['correct_answer'] for q in theme_data['questions'] if q['id'] != question['id'] ]
         logger.debug(f"Found {len(other_answers)} other answers")
 
         if len(other_answers) < num_options - 1:
@@ -347,10 +326,7 @@ class QuestionSelector:
     def get_theme_info(self) -> Dict[str, Dict[str, Any]]:
         """Returns detailed information about each theme"""
         return {
-            tag: {
-                'name': data['name'],
-                'question_count': len(data['questions'])
-            }
+            tag: { 'name': data['name'], 'question_count': len(data['questions']) }
             for tag, data in self.themes.items()
         }
 
@@ -383,6 +359,8 @@ def get_number_emoji(number: int) -> str:
     """Convert number to emoji representation"""
     emojis = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
     return emojis[number - 1] if 1 <= number <= 10 else str(number)
+
+
 
 def generate_and_send_question(session, chat_id, user_info):
     """Helper function to generate and send a question to user"""
@@ -430,10 +408,7 @@ def generate_and_send_question(session, chat_id, user_info):
 
         keyboard = types.InlineKeyboardMarkup(row_width=len(options))
         buttons = [
-            types.InlineKeyboardButton(
-                text=get_number_emoji(idx), 
-                callback_data=f"answer:{question['question_id']}:{idx}"
-            )
+            types.InlineKeyboardButton( text=get_number_emoji(idx),  callback_data=f"answer:{question['question_id']}:{idx}" )
             for idx in range(1, len(options)+1)
         ]
         keyboard.add(*buttons)
@@ -461,15 +436,12 @@ def handle_start(message):
         # Create theme selection keyboard
         keyboard = types.InlineKeyboardMarkup(row_width=1)
         for theme_tag, theme_data in session.question_selector.themes.items():
-            button = types.InlineKeyboardButton(
-                text=theme_data['name'],
-                callback_data=f"theme:{theme_tag}"
-            )
+            button = types.InlineKeyboardButton( text=theme_data['name'], callback_data=f"theme:{theme_tag}" )
             keyboard.add(button)
         
         welcome_text = (
             "Добро пожаловать!\n\n"
-            "Выбрите тематику вопросов:"
+            "Выберите тематику вопросов:"
         )
         bot.send_message(message.chat.id, welcome_text, reply_markup=keyboard)
         logger.info(f"Session reset and theme selection sent for user {user_info}")
@@ -508,17 +480,13 @@ def get_global_stats(theme: str = None):
                 
             theme_stats = user_data.get('theme_stats', {})
             user_name = user_data.get('user_name', 'Неизвестный')
+            user_id = Path(session_file).stem.replace('user_', '')
             
             # If theme specified, get stats only for that theme
             if theme:
                 stats = theme_stats.get(theme, {'total': 0, 'correct': 0})
                 if stats['total'] > 0:
-                    user_stats.append({
-                        'user_id': Path(session_file).stem.replace('user_', ''),
-                        'user_name': user_name,
-                        'total': stats['total'],
-                        'correct': stats['correct']
-                    })
+                    user_stats.append({ 'user_id': user_id, 'user_name': user_name, 'total': stats['total'], 'correct': stats['correct'] })
             # Otherwise, sum up stats for all themes
             else:
                 total = 0
@@ -527,33 +495,18 @@ def get_global_stats(theme: str = None):
                     total += t_stats.get('total', 0)
                     correct += t_stats.get('correct', 0)
                 if total > 0:
-                    user_stats.append({
-                        'user_id': Path(session_file).stem.replace('user_', ''),
-                        'user_name': user_name,
-                        'total': total,
-                        'correct': correct
-                    })
+                    user_stats.append({ 'user_id': user_id, 'user_name': user_name, 'total': total, 'correct': correct })
                     
         except Exception as e:
             logger.error(f"Failed to load stats from {session_file}: {e}")
             continue
     
     # Sort users by correct answers (desc) and then by total answers (desc)
-    return sorted(
-        user_stats,
-        key=lambda x: (x['correct'], x['total']),
-        reverse=True
-    )
+    return sorted( user_stats, key=lambda x: (x['correct'], x['total']), reverse=True )
 
 def get_position_emoji(position: int) -> str:
-    """Get emoji for position in rating"""
-    if position == 1:
-        return "🥇"
-    elif position == 2:
-        return "🥈"
-    elif position == 3:
-        return "🥉"
-    return ""
+    emojis = ["", "🥇", "🥈", "🥉"]
+    return emojis[position] if 1 <= position <= 3 else ""
 
 @bot.callback_query_handler(func=lambda call: call.data == "global_stats")
 def handle_global_stats_callback(call):
@@ -569,7 +522,7 @@ def handle_global_stats_callback(call):
         stats = get_global_stats(current_theme)
         
         if not stats:
-            bot.send_message(call.message.chat.id, "Пока нет статистики для этой темы")
+            bot.send_message(call.message.chat.id, "Нет статистики тематики")
             bot.answer_callback_query(call.id)
             return
             
@@ -595,11 +548,7 @@ def handle_global_stats_callback(call):
         next_button = types.InlineKeyboardButton(text="Следующий вопрос ➡️", callback_data="next")
         keyboard.add(next_button)
         
-        bot.send_message(
-            call.message.chat.id,
-            response,
-            reply_markup=keyboard
-        )
+        bot.send_message( call.message.chat.id, response, reply_markup=keyboard)
         bot.answer_callback_query(call.id)
         
     except Exception as e:
@@ -618,29 +567,26 @@ def handle_stats_callback(call):
         
         # Get global stats to find user's position
         global_stats = get_global_stats(current_theme)
-        user_position = next(
-            (i for i, stat in enumerate(global_stats, 1) 
-            if str(user.id) == stat['user_id']),
-            None
-        )
+        user_position = next( (i for i, stat in enumerate(global_stats, 1)  if str(user.id) == stat['user_id']), None )
         
         # Find stats for current theme
-        current_theme_stats = None
+        theme_stats = None
         for theme in stats['themes']:
             if theme['theme_tag'] == current_theme:
-                current_theme_stats = theme
+                theme_stats = theme
                 break
         
-        if current_theme_stats:
+        if theme_stats:
             position_mark = get_position_emoji(user_position) if user_position else ""
+            percentage_str = f"{theme_stats['percentage']:.1f}%"
             response = (
-                f"📊 *Статистика по тематике {current_theme_stats['theme_name']}*\n"
+                f"📊 *Статистика по тематике {theme_stats['theme_name']}*\n"
                 f"🏆 Место в рейтинге: {user_position} из {len(global_stats)} {position_mark}\n\n"
-                f"Всего ответов {current_theme_stats['total']}, из них правильных: {current_theme_stats['correct']} ({current_theme_stats['percentage']:.1f}%)\n\n"
+                f"Всего ответов {theme_stats['total']}, из них правильных: {theme_stats['correct']} ({percentage_str})\n\n"
                 f"Вопросы:\n"
             )
             
-            for q_stat in current_theme_stats['questions']:
+            for q_stat in theme_stats['questions']:
                 response += (
                     f"{q_stat['total']}/{q_stat['correct']}"
                     f"({q_stat['percentage']:.1f}%): *{q_stat['question']}*\n"
@@ -674,19 +620,12 @@ def handle_change_theme_callback(call):
     
     # Add button for each theme
     theme_buttons = [
-        types.InlineKeyboardButton(
-            text=theme['name'], 
-            callback_data=f"theme:{theme['tag']}"
-        )
+        types.InlineKeyboardButton( text=theme['name'],  callback_data=f"theme:{theme['tag']}" )
         for theme in themes
     ]
     keyboard.add(*theme_buttons)
     
-    bot.send_message(
-        call.message.chat.id,
-        "Выберите тематику вопросов:",
-        reply_markup=keyboard
-    )
+    bot.send_message( call.message.chat.id, "Выберите тематику вопросов:", reply_markup=keyboard )
     bot.answer_callback_query(call.id)
 
 @bot.callback_query_handler(func=lambda call: call.data == "next")
@@ -710,16 +649,12 @@ def handle_theme_callback(call):
         theme_info = session.question_selector.get_current_theme()
         
         # Update and save user info
-        session.data.update({
-            'user_id': user.id,
-            'user_name': user.username or user.first_name,
-            'last_update': time.time()
-        })
+        session.data.update({ 'user_id': user.id, 'user_name': user.username or user.first_name, 'last_update': time.time() })
         session._save_session()
         
         response = f"Выбрана {theme_info['name'].lower()}."
     else:
-        response = f"Ошибка при выборе темы: {theme} не найдена"
+        response = f"Ошибка при выборе тематики: {theme} не найдена"
 
     bot.send_message(call.message.chat.id, response)
     # Generate new question after theme change
@@ -820,9 +755,9 @@ def handle_answer_callback(call):
 
         # Create keyboard with multiple buttons
         keyboard = types.InlineKeyboardMarkup(row_width=3)
-        next_button = types.InlineKeyboardButton(text="Следующий вопрос ➡️", callback_data="next")
-        stats_button = types.InlineKeyboardButton(text="📊 Статистика", callback_data="stats")
-        theme_button = types.InlineKeyboardButton(text="🔄 Сменить тематику", callback_data="change_theme")
+        next_button = types.InlineKeyboardButton(text="Вопрос ➡️", callback_data="next")
+        stats_button = types.InlineKeyboardButton(text="Статистика 📊", callback_data="stats")
+        theme_button = types.InlineKeyboardButton(text="Тематика 🔄", callback_data="change_theme")
         keyboard.add(next_button, stats_button, theme_button)
 
         # Prepare and send responses based on correctness
@@ -868,11 +803,7 @@ def handle_answer_callback(call):
         bot.answer_callback_query(call.id)
 
         # Update statistics and clear last question
-        session.update_question_stats(
-            question_id=question_id, 
-            is_correct=is_correct,
-            theme=last_question['theme']  # Add theme parameter
-        )
+        session.update_question_stats( question_id=question_id,  is_correct=is_correct, theme=last_question['theme'] )
         session.clear_last_question()
 
     except Exception as e:
@@ -881,7 +812,7 @@ def handle_answer_callback(call):
         bot.answer_callback_query(call.id, "Произошла ошибка.")
 
         
-class CodeChangeHandler(FileSystemEventHandler):
+class CodeChangeHandler(FileSystemEventHandler)
     def __init__(self):
         self.last_modified = time.time()
         
