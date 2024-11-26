@@ -28,6 +28,14 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+bot_token = os.getenv('BOT_TOKEN')
+if not bot_token:
+    logger.error("BOT_TOKEN environment variable is not set.")
+    sys.exit("Error: BOT_TOKEN environment variable is not set.")
+logger.info(f"Bot init, token: {bot_token}")
+bot = telebot.TeleBot(bot_token)
+
+
 # Global dictionary to store sessions
 sessions = {}
 sessions_lock = threading.Lock()
@@ -277,9 +285,6 @@ class QuestionSelector:
             logger.error(f"Audio folder not found at {audio_folder.absolute()}")
             raise ValueError(f"Audio folder not found at {audio_folder.absolute()}")
         
-        # Track question IDs across all themes
-        seen_question_ids = set()
-        
         for file_path in theme_files:
             try:
                 with open(file_path, 'r', encoding='utf-8') as f:
@@ -299,16 +304,21 @@ class QuestionSelector:
                         files_str = "\n".join(f"- {f}" for f in missing_files)
                         logger.error(f"Missing audio files for theme '{theme_tag}':\n{files_str}")
                         raise ValueError(f"Missing audio files for theme '{theme_tag}':\n{files_str}")
-                    
-                    # Check for duplicate question IDs
+
+                    # Check for duplicate question IDs within this theme
                     questions = theme_data.get('questions', [])
+                    seen_question_ids = set()
                     for question in questions:
                         question_id = question.get('id')
+                        if not question_id:
+                            logger.error(f"Question ID missing in theme '{theme_tag}'")
+                            raise ValueError(f"Question ID missing in theme '{theme_tag}'")
+                        
                         if question_id in seen_question_ids:
-                            logger.error(f"Duplicate question ID {question_id} found in theme '{theme_tag}'")
-                            raise ValueError(f"Duplicate question ID {question_id} found in theme '{theme_tag}'")
+                            logger.error(f"Duplicate question ID {question_id} found within theme '{theme_tag}'")
+                            raise ValueError(f"Duplicate question ID {question_id} found within theme '{theme_tag}'")
                         seen_question_ids.add(question_id)
-                    
+                        
                     self.themes[theme_tag] = {
                         'name': theme_data.get('name', theme_tag),
                         'questions': questions
@@ -426,15 +436,15 @@ def get_session(user) -> UserSession:
             sessions[user.id] = session
         return sessions[user.id]
 
-def signal_handler(signum, frame):
+def signal_handler(_signum, _frame, bot):
     """Handle shutdown signals"""
     logger.info("Received shutdown signal")
     logger.info("Stopping bot...")
     bot.stop_polling()
     sys.exit(0)
 
-signal.signal(signal.SIGINT, signal_handler)
-signal.signal(signal.SIGTERM, signal_handler)
+signal.signal(signal.SIGINT, lambda signum, frame: signal_handler(signum, frame, bot))
+signal.signal(signal.SIGTERM, lambda signum, frame: signal_handler(signum, frame, bot))
 
 def get_question_from_themes(themes, search_key, search_value):
     iterator = (q for theme in themes.values() 
@@ -641,7 +651,7 @@ def handle_global_stats_callback(call):
         
         # Create keyboard with return button
         keyboard = types.InlineKeyboardMarkup()
-        next_button = types.InlineKeyboardButton(text="Следующий вопрос ➡️", callback_data="next")
+        next_button = types.InlineKeyboardButton(text="Вернуться к вопросам ➡️", callback_data="next")
         keyboard.add(next_button)
         
         bot.send_message( call.message.chat.id, response, reply_markup=keyboard)
@@ -691,7 +701,7 @@ def handle_stats_callback(call):
         
         # Create keyboard with return and global stats buttons
         keyboard = types.InlineKeyboardMarkup()
-        next_button = types.InlineKeyboardButton(text="Следующий вопрос ➡️", callback_data="next")
+        next_button = types.InlineKeyboardButton(text="Вопрос ➡️", callback_data="next")
         global_stats_button = types.InlineKeyboardButton(text="Общий рейтинг 🏆", callback_data="global_stats")
         keyboard.add(next_button, global_stats_button)
         
@@ -781,8 +791,8 @@ def handle_answer_callback(call):
             question_id = int(question_id)
             selected_option = int(selected_option)
         except (ValueError, IndexError) as e:
-            logger.error(f"Invalid callback data format: {call.data}")
-            bot.answer_callback_query(call.id, "Неверный формат данных.")
+            logger.error(f"Invalid callback data format: {call.data}, error: {e}")
+            bot.answer_callback_query(call.id, f"Неверный формат данных: {e}")
             return
 
         last_question = session.get_last_question()
@@ -852,9 +862,9 @@ def handle_answer_callback(call):
 
         # Create keyboard with multiple buttons
         keyboard = types.InlineKeyboardMarkup(row_width=3)
-        next_button = types.InlineKeyboardButton(text="Вопрос ➡️", callback_data="next")
-        stats_button = types.InlineKeyboardButton(text="Статистика 📊", callback_data="stats")
-        theme_button = types.InlineKeyboardButton(text="Тематика 🔄", callback_data="change_theme")
+        next_button = types.InlineKeyboardButton(text="Дальше ➡️", callback_data="next")
+        stats_button = types.InlineKeyboardButton(text="📊", callback_data="stats")
+        theme_button = types.InlineKeyboardButton(text="Тема 🔄", callback_data="change_theme")
         keyboard.add(next_button, stats_button, theme_button)
 
         # Prepare and send responses based on correctness
@@ -934,11 +944,6 @@ class CodeChangeHandler(FileSystemEventHandler):
 
 if __name__ == '__main__':
     logger.info("Starting bot...")
-    bot_token = os.getenv('BOT_TOKEN')
-    if not bot_token:
-        logger.error("BOT_TOKEN environment variable is not set.")
-        sys.exit("Error: BOT_TOKEN environment variable is not set.")
-    bot = telebot.TeleBot(bot_token)
 
     
     # Set up file watcher
