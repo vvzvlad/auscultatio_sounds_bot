@@ -41,7 +41,7 @@ bot = telebot.TeleBot(bot_token)
 
 # Global dictionary to store sessions
 sessions = {}
-sessions_lock = threading.Lock()
+sessions_lock = threading.RLock()
 
 def get_position_emoji(position: int) -> str:
     emojis = ["", "🥇", "🥈", "🥉"]
@@ -65,7 +65,7 @@ class UserSession:
         self.user_info = get_user_info(user)
         self.user_id = user.id
         self.user_name = user.username or user.first_name
-        self.lock = threading.Lock()
+        self.lock = threading.RLock()
 
         # Create all necessary directories
         self.SESSIONS_DIR.parent.mkdir(exist_ok=True)  # Create 'data' directory
@@ -127,6 +127,7 @@ class UserSession:
                 del self.data['last_question']
                 logger.info(f"Cleared last_question for user {self.user_info}")
                 self.save_session()
+                
     def reset_session(self):
         with self.lock:            
             # Delete session file
@@ -226,6 +227,67 @@ class UserSession:
         """Get current theme from user data"""
         with self.lock:
             return self.data.get('current_theme')
+
+    def smart_get_question(self, num_options: int = 4) -> Dict[str, Any]:
+        """Return the question with the fewest correct answers for the user."""
+        with self.lock:
+            
+            # Get current theme
+            current_theme = self.get_theme()
+            if not current_theme:
+                raise ValueError("Theme not selected.")
+
+            theme_data = self.question_selector.themes.get(current_theme)
+            if not theme_data:
+                raise ValueError(f"Theme '{current_theme}' not found.")
+
+            questions = theme_data['questions']
+            if not questions:
+                raise ValueError(f"No questions available in theme '{current_theme}'.")
+
+            # Get user stats for this theme
+            theme_stats = self.data.get('theme_stats', {}).get(current_theme, {})
+            question_stats = theme_stats.get('question_stats', {})
+
+            # Group questions by number of correct answers
+            questions_by_correct = {}
+            for q in questions:
+                correct = question_stats.get(str(q['id']), {}).get('correct', 0)
+                if correct not in questions_by_correct:
+                    questions_by_correct[correct] = []
+                questions_by_correct[correct].append(q)
+
+            # Get questions with minimum correct answers
+            min_correct = min(questions_by_correct.keys()) if questions_by_correct else 0
+            candidate_questions = questions_by_correct.get(min_correct, questions)
+            
+            # Randomly select from the questions with minimum correct answers
+            question = random.choice(candidate_questions)
+            correct_answer = question['correct_answer']
+
+            # Get other answers
+            other_answers = [q['correct_answer'] for q in questions if q['id'] != question['id']]
+            wrong_answers = random.sample(other_answers, min(len(other_answers), num_options - 1))
+            options = wrong_answers + [correct_answer]
+            random.shuffle(options)
+
+            correct_option = options.index(correct_answer) + 1  # 1-based indexing
+
+            # Handle files if present
+            file = None
+            if question.get('files'):
+                file = random.choice(question['files'])
+                logger.info(f"Selected file {file} for question {question['id']}")
+
+            return {
+                'question_id': question['id'],
+                'text': question['text'],
+                'file': file,
+                'options': options,
+                'correct_option': correct_option,
+                'theme': current_theme,
+                'theme_name': theme_data['name']
+            }
 
 def validate_theme_data(theme_data):
     """Validate theme data structure"""
@@ -351,57 +413,6 @@ class QuestionSelector:
             return { 'tag': self.current_theme, 'name': self.themes[self.current_theme]['name'] }
         return None
 
-    def get_random_question(self, num_options: int = 4) -> Dict[str, Any]:
-        if not self.themes:
-            logger.error("No themes available")
-            raise ValueError("No themes available.")
-
-        if not self.current_theme:
-            logger.error("No theme selected")
-            raise ValueError("Тема не выбрана. Пожалуйста, нажмите /start")
-            
-        theme_data = self.themes[self.current_theme]
-        questions = theme_data['questions']
-
-        if not questions:
-            logger.error(f"No questions available in theme '{self.current_theme}'")
-            raise ValueError(f"No questions available in theme '{self.current_theme}'.")
-
-        question = random.choice(questions)
-        logger.info(f"Selected question ID: {question['id']} from theme '{self.current_theme}'")
-        correct_answer = question['correct_answer']
-
-        # Randomly select one audio file if multiple are available
-        file = None
-        if question.get('files'):
-            file = random.choice(question['files'])
-            logger.info(f"Selected audio file {file} for question {question['id']}")
-
-        # Get all other answers from current theme only
-        other_answers = [ q['correct_answer'] for q in theme_data['questions'] 
-                        if q['id'] != question['id']]
-        
-        if len(other_answers) < num_options - 1:
-            num_options = len(other_answers) + 1  # Reduce options if not enough questions
-            logger.warning(f"Not enough questions in theme '{self.current_theme}'. Reducing options to {num_options}")
-        
-        wrong_answers = random.sample(other_answers, num_options - 1)
-        options = wrong_answers + [correct_answer]
-        random.shuffle(options)
-
-        correct_option = options.index(correct_answer) + 1  # 1-based indexing
-
-        logger.info(f"Generated options for question {question['id']}: {options}")
-        return {
-            'question_id': question['id'],
-            'text': question['text'],
-            'file': file,
-            'options': options,
-            'correct_option': correct_option,
-            'theme': self.current_theme,
-            'theme_name': theme_data['name']
-        }
-
     def get_themes(self) -> List[Dict[str, str]]:
         """Returns a list of dictionaries containing theme information"""
         return [
@@ -455,9 +466,11 @@ def get_question_from_themes(themes, search_key, search_value):
 def generate_and_send_question(session, chat_id, user_info):
     """Helper function to generate and send a question to user"""
     try:
+        
         # Check if theme is selected
         current_theme = session.question_selector.current_theme
         if not current_theme:
+            logger.info(f"Theme not selected for user {user_info}, sending theme selection")
             # Create keyboard with theme buttons
             keyboard = types.InlineKeyboardMarkup(row_width=1)
             themes = session.question_selector.get_themes()
@@ -470,12 +483,14 @@ def generate_and_send_question(session, chat_id, user_info):
             bot.send_message(chat_id, "Тема не выбрана. Выберите своего бойца:", reply_markup=keyboard)
             return False
             
-        question = session.question_selector.get_random_question()
+        # Use the new method to get the least correct question
+        
+        question = session.smart_get_question()
+        
         logger.info(f"Generated question {question['question_id']} for user {user_info}")
 
         bot.send_message(chat_id, f"{question['text']}\n\n")
 
-        # Try to send audio first to check permissions
         if question.get('file'):
             if "mp3" in question['file'] or "ogg" in question['file']:
                 logger.info(f"Selected audio file {question['file']}")
@@ -507,7 +522,7 @@ def generate_and_send_question(session, chat_id, user_info):
                         return False
                     else:
                         logger.error(f"Failed to send audio file {file_path} for user {user_info}: {e}")
-                        bot.send_message(chat_id, "Не удалось отправить аудиофайл")
+                        bot.send_message(chat_id, "Не удалось отправить аудио��айл")
                         return False
             if "jpg" in question['file'] or "png" in question['file']:
                 logger.info(f"Selected image file {question['file']}")
@@ -606,7 +621,7 @@ def get_global_stats(theme: str = None):
                 user_data = json.load(f)
                 
             theme_stats = user_data.get('theme_stats', {})
-            user_name = user_data.get('user_name', 'Не��звестный')
+            user_name = user_data.get('user_name', 'Незвестный')
             user_id = Path(session_file).stem.replace('user_', '')
             
             # If theme specified, get stats only for that theme
@@ -678,6 +693,7 @@ def handle_global_stats_callback(call):
 
 @bot.callback_query_handler(func=lambda call: call.data == "stats")
 def handle_stats_callback(call):
+
     user = call.from_user
     user_info = get_user_info(user)
     logger.info(f"Received stats callback from user {user_info}")
@@ -729,10 +745,9 @@ def handle_stats_callback(call):
 
 @bot.callback_query_handler(func=lambda call: call.data == "change_theme")
 def handle_change_theme_callback(call):
+    logger.info(f"Received change theme callback from user {get_user_info(call.from_user)}")
     user = call.from_user
-    user_info = get_user_info(user)
     session = get_session(user)
-    logger.info(f"Received change theme callback from user {user_info}")
     
     # Create keyboard with theme options
     keyboard = types.InlineKeyboardMarkup(row_width=1)
@@ -750,6 +765,7 @@ def handle_change_theme_callback(call):
 
 @bot.callback_query_handler(func=lambda call: call.data == "next")
 def handle_next_callback(call):
+    logger.info(f"Received next callback from user {get_user_info(call.from_user)}")
     user = call.from_user
     user_info = get_user_info(user)
     session = get_session(user)
@@ -759,6 +775,7 @@ def handle_next_callback(call):
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith("theme:"))
 def handle_theme_callback(call):
+    logger.info(f"Received theme callback from user {get_user_info(call.from_user)}: {call.data}")
     try:
         user = call.from_user
         user_info = get_user_info(user)
@@ -968,7 +985,7 @@ class CodeChangeHandler(FileSystemEventHandler):
                     logger.error(f"Failed to restart bot: {e}")
 
 if __name__ == '__main__':
-    logger.info("Starting bot...")
+    logger.info("\n\n\nStarting bot...")
 
     
     # Set up file watcher
