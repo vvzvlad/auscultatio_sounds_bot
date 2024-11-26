@@ -659,7 +659,7 @@ def handle_global_stats_callback(call):
         
     except Exception as e:
         logger.error(f"Error showing global stats for user {user_info}: {e}")
-        bot.answer_callback_query(call.id, "Ошибка при показе глобальной статистики")
+        bot.answer_callback_query(call.id, "Ошибка при показе рейтинга")
 
 @bot.callback_query_handler(func=lambda call: call.data == "stats")
 def handle_stats_callback(call):
@@ -697,7 +697,7 @@ def handle_stats_callback(call):
                     f"({q_stat['percentage']:.1f}%): *{q_stat['question']}*\n"
                 )
         else:
-            response = "По текущей тематике пока нет статистики"
+            response = "По тематике нет статистики"
         
         # Create keyboard with return and global stats buttons
         keyboard = types.InlineKeyboardMarkup()
@@ -880,7 +880,7 @@ def handle_answer_callback(call):
             # Send initial wrong answer message
             response = (
                 f"❌ *{selected_answer}* — неправильный ответ ❌\n\n"
-                f"Правильный ответ — *{correct_answer.lower()}*.\n\n"
+                f"Правильный — *{correct_answer.lower()}*.\n\n"
             )
             
             # Send correct answer explanation with audio hint
