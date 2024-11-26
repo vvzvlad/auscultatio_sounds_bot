@@ -13,8 +13,11 @@ import sys
 from pathlib import Path
 import glob
 import time
-
 from typing import List, Dict, Any
+
+import requests.exceptions
+from urllib3.exceptions import NewConnectionError
+
 import telebot
 from telebot import types
 from watchdog.observers import Observer
@@ -254,11 +257,11 @@ def validate_theme_data(theme_data):
         if not isinstance(question['correct_answer'], str):
             raise ValueError(f"Question correct_answer must be a string, got {type(question['correct_answer'])}")
             
-        # Validate audio_paths if present
-        if 'audio_paths' in question:
-            if not isinstance(question['audio_paths'], list):
-                raise ValueError("audio_paths must be an array")
-            for path in question['audio_paths']:
+        # Validate files if present
+        if 'files' in question:
+            if not isinstance(question['files'], list):
+                raise ValueError("files must be an array")
+            for path in question['files']:
                 if not isinstance(path, str):
                     raise ValueError(f"Audio path must be a string, got {type(path)}")
                     
@@ -279,12 +282,6 @@ class QuestionSelector:
         theme_files = glob.glob(os.path.join(folder, '*.json'))
         logger.info(f"Found {len(theme_files)} theme files")
         
-        # Add audio folder check
-        audio_folder = Path("audio")
-        if not audio_folder.exists():
-            logger.error(f"Audio folder not found at {audio_folder.absolute()}")
-            raise ValueError(f"Audio folder not found at {audio_folder.absolute()}")
-        
         for file_path in theme_files:
             try:
                 with open(file_path, 'r', encoding='utf-8') as f:
@@ -298,12 +295,13 @@ class QuestionSelector:
                         logger.warning(f"No tag found in {file_path}, using filename")
                         theme_tag = Path(file_path).stem
                     
-                    # Check audio files before adding theme
-                    missing_files = self._check_audio_files(theme_data.get('questions', []))
+                    # Check questions files before adding theme
+                    logger.info(f"Checking theme '{theme_tag}' for missing files")
+                    missing_files = self._check_questions_files(theme_data.get('questions', []))
                     if missing_files:
                         files_str = "\n".join(f"- {f}" for f in missing_files)
-                        logger.error(f"Missing audio files for theme '{theme_tag}':\n{files_str}")
-                        raise ValueError(f"Missing audio files for theme '{theme_tag}':\n{files_str}")
+                        logger.error(f"Missing questions files for theme '{theme_tag}':\n{files_str}")
+                        raise ValueError(f"Missing questions files for theme '{theme_tag}':\n{files_str}")
 
                     # Check for duplicate question IDs within this theme
                     questions = theme_data.get('questions', [])
@@ -328,21 +326,22 @@ class QuestionSelector:
                 logger.error(f"Failed to load questions from {file_path}: {e}")
                 raise
 
-    def _check_audio_files(self, questions) -> list:
-        """Check if all required audio files exist"""
+    def _check_questions_files(self, questions) -> list:
+        """Check if all required questions files exist"""
         missing_files = []
         for question in questions:
-            if 'audio_paths' in question:
-                for audio_path in question['audio_paths']:
-                    full_path = Path('audio') / audio_path
+            if 'files' in question:
+                for file_path in question['files']:
+                    # Convert string path to Path object and check relative to directory
+                    full_path = Path('questions') / file_path
+                    logger.debug(f"Checking file {full_path}")
                     if not full_path.exists():
-                        missing_files.append(audio_path)
+                        missing_files.append(str(full_path))
         return missing_files
 
     def set_theme(self, theme_tag: str) -> bool:
         if theme_tag in self.themes:
             self.current_theme = theme_tag
-            logger.info(f"Set current theme to '{theme_tag}' ({self.themes[theme_tag]['name']})")
             return True
         logger.warning(f"Theme '{theme_tag}' not found")
         return False
@@ -359,7 +358,7 @@ class QuestionSelector:
 
         if not self.current_theme:
             logger.error("No theme selected")
-            raise ValueError("Тематика не выбрана. Пожалуйста, нажмите /start")
+            raise ValueError("Тема не выбрана. Пожалуйста, нажмите /start")
             
         theme_data = self.themes[self.current_theme]
         questions = theme_data['questions']
@@ -369,14 +368,14 @@ class QuestionSelector:
             raise ValueError(f"No questions available in theme '{self.current_theme}'.")
 
         question = random.choice(questions)
-        logger.debug(f"Selected question ID: {question['id']} from theme '{self.current_theme}'")
+        logger.info(f"Selected question ID: {question['id']} from theme '{self.current_theme}'")
         correct_answer = question['correct_answer']
 
         # Randomly select one audio file if multiple are available
-        audio_file = None
-        if question.get('audio_paths'):
-            audio_file = random.choice(question['audio_paths'])
-            logger.debug(f"Selected audio file {audio_file} for question {question['id']}")
+        file = None
+        if question.get('files'):
+            file = random.choice(question['files'])
+            logger.info(f"Selected audio file {file} for question {question['id']}")
 
         # Get all other answers from current theme only
         other_answers = [ q['correct_answer'] for q in theme_data['questions'] 
@@ -392,11 +391,11 @@ class QuestionSelector:
 
         correct_option = options.index(correct_answer) + 1  # 1-based indexing
 
-        logger.debug(f"Generated options for question {question['id']}: {options}")
+        logger.info(f"Generated options for question {question['id']}: {options}")
         return {
             'question_id': question['id'],
             'text': question['text'],
-            'audio_file': audio_file,
+            'file': file,
             'options': options,
             'correct_option': correct_option,
             'theme': self.current_theme,
@@ -468,53 +467,69 @@ def generate_and_send_question(session, chat_id, user_info):
                     callback_data=f"theme:{theme['tag']}"
                 )
                 keyboard.add(button)
-            bot.send_message(chat_id, "Тематика не выбрана. Выберите своего бойца:", reply_markup=keyboard)
+            bot.send_message(chat_id, "Тема не выбрана. Выберите своего бойца:", reply_markup=keyboard)
             return False
             
         question = session.question_selector.get_random_question()
         logger.info(f"Generated question {question['question_id']} for user {user_info}")
 
-        # Try to send audio first to check permissions
-        if question.get('audio_file'):
-            audio_path = os.path.join('audio', question['audio_file'])
-            if not os.path.exists(audio_path):
-                logger.error(f"Audio file not found: {audio_path}")
-                bot.send_message(chat_id, "Не удалось найти аудиофайл")
-                return False
-            try:
-                with open(audio_path, 'rb') as audio:
-                    bot.send_voice(chat_id, audio)
-                logger.info(f"Sent audio file for user {user_info}: {audio_path}")
-            except telebot.apihelper.ApiTelegramException as e:
-                if "VOICE_MESSAGES_FORBIDDEN" in str(e) or "user restricted receiving of video messages" in str(e):
-                    error_message = (
-                        "❌ Вам запрещено присылать голосовые сообщения.\n"
-                        "Для того, чтобы мы могли отправить примеры аускультаций, необходимо разрешить отправку вам голосовых сообщений:\n"
-                        "1. Откройте настройки телеграма\n"
-                        "2. Перейдите в раздел «Конфиденциальность»\n"
-                        "3. Выберите пункт «Голосовые сообщения»\n"
-                        "4. Добавьте бота в список исключений или разрешите отправку всем пользователям\n"
-                    )
-                    logger.error(f"Voice messages forbidden for user {user_info}")
-                    keyboard = types.InlineKeyboardMarkup()
-                    next_button = types.InlineKeyboardButton(text="Я разрешил ✅", callback_data="next")
-                    keyboard.add(next_button)
-                    bot.send_message(chat_id, error_message, reply_markup=keyboard)
-                    return False
-                else:
-                    logger.error(f"Failed to send audio file {audio_path} for user {user_info}: {e}")
-                    bot.send_message(chat_id, "Не удалось отправить аудиофайл")
-                    return False
-
         bot.send_message(chat_id, f"{question['text']}\n\n")
 
+        # Try to send audio first to check permissions
+        if question.get('file'):
+            if "mp3" in question['file'] or "ogg" in question['file']:
+                logger.info(f"Selected audio file {question['file']}")
+                file_path = os.path.join('questions', question['file'])
+                logger.info(f"File path: {file_path}")
+                if not os.path.exists(file_path):
+                    logger.error(f"File not found: {file_path}")
+                    bot.send_message(chat_id, f"Не удалось найти файл: {file_path}")
+                    return False
+                try:
+                    with open(file_path, 'rb') as file:
+                        bot.send_voice(chat_id, file)
+                    logger.info(f"Sent audio file for user {user_info}: {file_path}")
+                except telebot.apihelper.ApiTelegramException as e:
+                    if "VOICE_MESSAGES_FORBIDDEN" in str(e) or "user restricted receiving of video messages" in str(e):
+                        error_message = (
+                            "❌ Вам запрещено присылать голосовые сообщения.\n"
+                            "Для того, чтобы мы могли отправить примеры аускультаций, необходимо разрешить отправку вам голосовых сообщений:\n"
+                            "1. Откройте настройки телеграма\n"
+                            "2. Перейдите в раздел «Конфиденциальность»\n"
+                            "3. Выберите пункт «Голосовые сообщения»\n"
+                            "4. Добавьте бота в список исключений или разрешите отправку всем пользователям\n"
+                        )
+                        logger.error(f"Voice messages forbidden for user {user_info}")
+                        keyboard = types.InlineKeyboardMarkup()
+                        next_button = types.InlineKeyboardButton(text="Я разрешил ✅", callback_data="next")
+                        keyboard.add(next_button)
+                        bot.send_message(chat_id, error_message, reply_markup=keyboard)
+                        return False
+                    else:
+                        logger.error(f"Failed to send audio file {file_path} for user {user_info}: {e}")
+                        bot.send_message(chat_id, "Не удалось отправить аудиофайл")
+                        return False
+            if "jpg" in question['file'] or "png" in question['file']:
+                logger.info(f"Selected image file {question['file']}")
+                file_path = os.path.join('questions', question['file'])
+                logger.info(f"File path: {file_path}")
+                if not os.path.exists(file_path):
+                    logger.error(f"File not found: {file_path}")
+                    bot.send_message(chat_id, f"Не удалось найти файл: {file_path}")
+                    return False
+                try:
+                    with open(file_path, 'rb') as file:
+                        bot.send_photo(chat_id, file)
+                    logger.info(f"Sent image file for user {user_info}: {file_path}")
+                except telebot.apihelper.ApiTelegramException as e:
+                    logger.error(f"Failed to send image file {file_path} for user {user_info}: {e}")
+                    bot.send_message(chat_id, "Не удалось отправить изображение")
+                    return False
+        
         # Send options with keyboard
         options = question['options']
         options_text = "\n".join([f"{get_number_emoji(i)} {option}" for i, option in enumerate(options, 1)])
-        options_message = (
-            f"Варианты ответов:\n{options_text}\n\n"
-            f"Выберите номер правильного варианта."
-        )
+        options_message = ( f"{options_text}\n\n" )
 
         keyboard = types.InlineKeyboardMarkup(row_width=len(options))
         buttons = [
@@ -551,7 +566,7 @@ def handle_start(message):
         
         welcome_text = (
             "Добро пожаловать!\n\n"
-            "Выберите тематику вопросов:"
+            "Выберите тему:"
         )
         bot.send_message(message.chat.id, welcome_text, reply_markup=keyboard)
         logger.info(f"Session reset and theme selection sent for user {user_info}")
@@ -576,7 +591,7 @@ def handle_all_messages(message):
             generate_and_send_question(session, message.chat.id, user_info)
     except Exception as e:
         logger.error(f"Unexpected error handling message from user {user_info}: {e}", exc_info=True)
-        bot.send_message(message.chat.id, f"Произошла непредвиденная ошибка: {e}")
+        bot.send_message(message.chat.id, f"Произошла непредвиденная шибка: {e}")
 
 
         
@@ -591,7 +606,7 @@ def get_global_stats(theme: str = None):
                 user_data = json.load(f)
                 
             theme_stats = user_data.get('theme_stats', {})
-            user_name = user_data.get('user_name', 'Неизвестный')
+            user_name = user_data.get('user_name', 'Не��звестный')
             user_id = Path(session_file).stem.replace('user_', '')
             
             # If theme specified, get stats only for that theme
@@ -629,12 +644,12 @@ def handle_global_stats_callback(call):
         stats = get_global_stats(current_theme)
         
         if not stats:
-            bot.send_message(call.message.chat.id, "Нет статистики тематики")
+            bot.send_message(call.message.chat.id, "Нет статистики темы")
             bot.answer_callback_query(call.id)
             return
             
         theme_name = session.question_selector.themes[current_theme]['name']
-        response = f"🏆 Рейтинг по тематике {theme_name}\n\n"
+        response = f"🏆 Рейтинг по теме {theme_name}\n\n"
         
         # Add stats for each user
         for i, stat in enumerate(stats, 1):
@@ -685,7 +700,7 @@ def handle_stats_callback(call):
             position_mark = get_position_emoji(user_position) if user_position else ""
             percentage_str = f"{theme_stats['percentage']:.1f}%"
             response = (
-                f"📊 *Статистика по тематике {theme_stats['theme_name']}*\n"
+                f"📊 *Статистика по теме {theme_stats['theme_name']}*\n"
                 f"🏆 Место в рейтинге: {user_position} из {len(global_stats)} {position_mark}\n\n"
                 f"Всего ответов {theme_stats['total']}, из них правильных: {theme_stats['correct']} ({percentage_str})\n\n"
                 f"Вопросы:\n"
@@ -697,7 +712,7 @@ def handle_stats_callback(call):
                     f"({q_stat['percentage']:.1f}%): *{q_stat['question']}*\n"
                 )
         else:
-            response = "По тематике нет статистики"
+            response = "По теме нет статистики"
         
         # Create keyboard with return and global stats buttons
         keyboard = types.InlineKeyboardMarkup()
@@ -730,7 +745,7 @@ def handle_change_theme_callback(call):
     ]
     keyboard.add(*theme_buttons)
     
-    bot.send_message( call.message.chat.id, "Выберите тематику вопросов:", reply_markup=keyboard )
+    bot.send_message( call.message.chat.id, "Выберите тему вопросов:", reply_markup=keyboard )
     bot.answer_callback_query(call.id)
 
 @bot.callback_query_handler(func=lambda call: call.data == "next")
@@ -763,9 +778,9 @@ def handle_theme_callback(call):
             session.save_session()
             
             theme_info = session.question_selector.get_current_theme()
-            response = f"Выбрана {theme_info['name'].lower()}."
+            response = f"Выбрана тема {theme_info['name'].lower()}"
         else:
-            response = f"Ошибка при выборе тематики: {theme} не найдена"
+            response = f"Не найдена тема {theme}"
 
         bot.send_message(call.message.chat.id, response)
         # Generate new question after theme change
@@ -810,8 +825,21 @@ def handle_answer_callback(call):
 
         # Get question data for explanations
         themes = session.question_selector.themes
-        question_data = get_question_from_themes( themes,  'id',  question_id )
-        selected_answer_data = get_question_from_themes( themes, 'correct_answer', selected_answer )
+        current_theme = session.question_selector.current_theme
+        
+        # Get data for current question from current theme
+        question_data = next(
+            (q for q in themes[current_theme]['questions'] 
+            if q['id'] == question_id),
+            None
+        )
+        
+        # Find explanation for selected answer ONLY in current theme
+        selected_answer_data = next(
+            (q for q in themes[current_theme]['questions'] 
+            if q['correct_answer'] == selected_answer and q['id'] != question_id),
+            None
+        )
 
         # Mark selected button with ✅ or ❌ and show correct answer
         options = last_question.get('options', [])
@@ -883,34 +911,31 @@ def handle_answer_callback(call):
                 f"Правильный — *{correct_answer.lower()}*.\n\n"
             )
             
-            # Send correct answer explanation with audio hint
-            if question_data and 'explanation' in question_data:
-                response += (
-                    f"{chr(10).join(question_data['explanation'])}\n\n"
-                    f"А вот как звучит *{selected_answer.lower()}*:"
-                )
-                
-            bot.send_message(call.message.chat.id, response, parse_mode="Markdown")
+            response += f"{chr(10).join(question_data['explanation'])}\n\n"
+            
+            wrong_answer_file_path = os.path.join('questions', selected_answer_data['files'][0])
+            if "mp3" in wrong_answer_file_path or "ogg" in wrong_answer_file_path:
+                response += f"\nА вот как звучит *{selected_answer.lower()}*:"
+                bot.send_message(call.message.chat.id, response, parse_mode="Markdown")
+                print(f"Sending audio file: {wrong_answer_file_path}")
+                try:
+                    with open(wrong_answer_file_path, 'rb') as audio:
+                        bot.send_voice(call.message.chat.id, audio)
+                except Exception as e:
+                    logger.error(f"Failed to send audio file {wrong_answer_file_path} for user {user_info}: {e}")
+            if "jpg" in wrong_answer_file_path or "png" in wrong_answer_file_path:
+                response += f"\nА вот как выглядит *{selected_answer.lower()}*:"
+                bot.send_message(call.message.chat.id, response, parse_mode="Markdown")
+                print(f"Sending image file: {wrong_answer_file_path}")
+                try:
+                    with open(wrong_answer_file_path, 'rb') as file:
+                        bot.send_photo(call.message.chat.id, file)
+                except Exception as e:
+                    logger.error(f"Failed to send image file {wrong_answer_file_path} for user {user_info}: {e}")
 
-            # Send audio of the wrong answer
-            if selected_answer_data and selected_answer_data.get('audio_paths'):
-                audio_file_name = selected_answer_data['audio_paths'][0]
-                audio_path = os.path.join('audio', audio_file_name)
-                if os.path.exists(audio_path):
-                    try:
-                        with open(audio_path, 'rb') as audio:
-                            bot.send_voice(call.message.chat.id, audio)
-                    except Exception as e:
-                        logger.error(f"Failed to send audio file {audio_path} for user {user_info}: {e}")
-                        bot.send_message(call.message.chat.id, "Не удалось отправить аудиофайл.")
-                else:
-                    logger.error(f"Audio file does not exist: {audio_path}")
-                    bot.send_message(call.message.chat.id, "Аудиофайл не найден.")
 
-            # Send wrong answer explanation with buttons
-            if selected_answer_data and 'explanation' in selected_answer_data:
-                wrong_explanation = chr(10).join(selected_answer_data['explanation'])
-                bot.send_message(call.message.chat.id, wrong_explanation, reply_markup=keyboard)
+            response = f"\n{chr(10).join(selected_answer_data['explanation'])}"
+            bot.send_message(call.message.chat.id, response, parse_mode="Markdown", reply_markup=keyboard)
 
         bot.answer_callback_query(call.id)
 
@@ -953,11 +978,23 @@ if __name__ == '__main__':
     observer.schedule(event_handler, path='questions', recursive=False)
     observer.start()
     
-    try:
-        bot.infinity_polling()
-    except Exception as e:
-        logger.error(f"Bot crashed: {e}", exc_info=True)
-    finally:
-        observer.stop()
-        observer.join()
-        logger.info("Bot stopped") 
+    while True:
+        try:
+            logger.info("Starting bot polling...")
+            bot.infinity_polling()
+        except (requests.exceptions.ConnectionError, 
+                requests.exceptions.ReadTimeout,
+                NewConnectionError) as e:
+
+            logger.error(f"Network error occurred: {e}")
+            logger.info("Waiting 2 seconds before retry...")
+            time.sleep(2) 
+            continue
+        except Exception as e:
+            # Log any other unexpected errors
+            logger.error(f"Bot crashed with unexpected error: {e}", exc_info=True)
+            break
+        finally:
+            observer.stop()
+            observer.join()
+            logger.info("Bot stopped") 

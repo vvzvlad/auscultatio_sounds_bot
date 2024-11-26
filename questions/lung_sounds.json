@@ -5,7 +5,7 @@
     {
       "id": 1,
       "text": "Какой звук вы слышите при аускультации?",
-      "audio_paths": ["lung/vezekuljarnoe.ogg"],
+      "files": ["lung_sounds/vezekuljarnoe.ogg"],
       "correct_answer": "Везикулярное (альвеолярное) дыхание",
       "explanation": [
         "Везикулярное дыхание — результат колебания эластических элементов стенок альвеол во время их последовательного заполнения воздухом на протяжении всей фазы вдоха и в течение ⅓ фазы выдоха в результате падения напряжения стенок альвеол.",
@@ -15,7 +15,7 @@
     {
       "id": 2,
       "text": "Какую патологию вы слышите?",
-      "audio_paths": ["lung/vezekuljarnoe-low-levoe.ogg"],
+      "files": ["lung_sounds/vezekuljarnoe-low-levoe.ogg"],
       "correct_answer": "Ослабленное везикулярное дыхание",
       "explanation": [
         "Везикулярное дыхание может усиливаться или ослабевать и в физиологических условиях, и при патологических процессах.",
@@ -26,7 +26,7 @@
     {
       "id": 3,
       "text": "Какой тип дыхания вы слышите?",
-      "audio_paths": ["lung/puerilnoe-dyshanie-levoe.ogg"],
+      "files": ["lung_sounds/puerilnoe-dyshanie-levoe.ogg"],
       "correct_answer": "Пуэрильное дыхание",
       "explanation": [
         "Пуэрильное дыхание (лат. puer «ребёнок») — разновидность везикулярного дыхания у здоровых детей в возрасте от 6 месяцев — 1 года до 7 лет, отличающееся от везикулярного усиленным и продолжительным шумом выдоха, и не встречается у взрослых."
@@ -35,7 +35,7 @@
     {
       "id": 4,
       "text": "Какой дыхательный шум вы слышите?",
-      "audio_paths": ["lung/larinhotrahealnoe-dyshanie.ogg"],
+      "files": ["lung_sounds/larinhotrahealnoe-dyshanie.ogg"],
       "correct_answer": "Ларинготрахеальное дыхание",
       "explanation": [
         "Ларинготрахеальное дыхание — это стенотический шум, возникающий при прохождении воздуха через область физиологического сужения — голосовую щель.",
@@ -46,7 +46,7 @@
     {
       "id": 5,
       "text": "Какую патологию вы слышите?",
-      "audio_paths": ["lung/krupoznoe.ogg"],
+      "files": ["lung_sounds/krupoznoe.ogg"],
       "correct_answer": "Патологическое бронхиальное дыхание",
       "explanation": [
         "Патологическое бронхиальное дыхание (ПБД) – выслушивается над лёгочной тканью вместо нормального везикулярного дыхания за счёт патологически усиленного проведения ларинготрахеального дыхания на поверхность грудной клетки.",
@@ -57,7 +57,7 @@
     {
       "id": 6,
       "text": "Какой патологический шум вы слышите?",
-      "audio_paths": ["lung/abscess.ogg"],
+      "files": ["lung_sounds/abscess.ogg"],
       "correct_answer": "Амфорическое дыхание",
       "explanation": [
         "Амфорическое дыхание формируется при образовании в легких полости (каверна, абсцесс, крупный бронхоэктаз) сообщающейся с бронхом.",
@@ -68,7 +68,7 @@
     {
       "id": 7,
       "text": "Какой тип дыхания вы слышите?",
-      "audio_paths": ["lung/zhestkoe-dyshanie.ogg"],
+      "files": ["lung_sounds/zhestkoe-dyshanie.ogg"],
       "correct_answer": "Жесткое дыхание",
       "explanation": [
         "Жесткое дыхание – это особое везикулярное дыхание, при котором изменяется тембр (нет мягкости) и нарушается соотношение вдоха к выдоху в сторону 1:1.",
@@ -80,7 +80,7 @@
     {
       "id": 8,
       "text": "Какой дыхательный шум вы слышите?",
-      "audio_paths": ["lung/sakkodirovannoe.ogg"],
+      "files": ["lung_sounds/sakkodirovannoe.ogg"],
       "correct_answer": "Саккадированное дыхание",
       "explanation": [
         "Саккадированное (прерывистое) дыхание – патологическая разновидность везикулярного дыхания.",
@@ -92,7 +92,7 @@
     {
       "id": 9,
       "text": "Какой звук вы слышите при аускультации?",
-      "audio_paths": ["lung/hripy.ogg", "lung/forsirovannoj.ogg"],
+      "files": ["lung_sounds/hripy.ogg", "lung_sounds/forsirovannoj.ogg"],
       "correct_answer": "Сухие дискантовые (свистящие) хрипы",
       "explanation": [
         "Сухие дискантовые (свистящие) хрипы – побочный дыхательный шум.",
@@ -103,7 +103,7 @@
     {
       "id": 10,
       "text": "Какой звук вы слышите при аускультации?",
-      "audio_paths": ["lung/hripy-suhie.ogg", "lung/suhoj.ogg"],
+      "files": ["lung_sounds/hripy-suhie.ogg", "lung_sounds/suhoj.ogg"],
       "correct_answer": "Сухие басовые хрипы",
       "explanation": [
         "Сухие басовые хрипы – побочный дыхательный шум. Возникает в крупных и средних бронхах, трахее.",
@@ -114,7 +114,10 @@
     {
       "id": 11,
       "text": "Какой звук вы слышите при аускультации?",
-      "audio_paths": ["lung/melko.ogg", "lung/posle-pokashlivanija.ogg"],
+      "files": [
+        "lung_sounds/melko.ogg",
+        "lung_sounds/posle-pokashlivanija.ogg"
+      ],
       "correct_answer": "Влажные мелкопузырчатые хрипы",
       "explanation": [
         "Мелкопузырчатые влажные хрипы - это звуки, возникающие в дыхательных путях при наличии избыточной жидкости, обычно связанной с заболеваниями легких.",
@@ -124,7 +127,7 @@
     {
       "id": 12,
       "text": "Какой звук вы слышите при аускультации?",
-      "audio_paths": ["lung/sredne.ogg", "lung/srednie.ogg"],
+      "files": ["lung_sounds/sredne.ogg", "lung_sounds/srednie.ogg"],
       "correct_answer": "Влажные средне и крупнопузырчатые хрипы",
       "explanation": [
         "Хрипы влажные - средне и крупнопузырчатые, это звуки, возникающие при наличии жидкости в дыхательных путях.",
@@ -136,7 +139,7 @@
     {
       "id": 13,
       "text": "Какой звук вы слышите при аускультации?",
-      "audio_paths": ["lung/melko-puzychatye.ogg"],
+      "files": ["lung_sounds/melko-puzychatye.ogg"],
       "correct_answer": "Влажные не звонкие мелкопузырчатые хрипы",
       "explanation": [
         "Влажные не звонкие мелкопузырчатые хрипы - это звуки, которые возникают в нижних дыхательных путях и могут указывать на наличие жидкости, например, при воспалительных процессах в легких.",
@@ -147,7 +150,7 @@
     {
       "id": 14,
       "text": "Какой звук вы слышите при аускультации?",
-      "audio_paths": ["lung/zvonkie.ogg"],
+      "files": ["lung_sounds/zvonkie.ogg"],
       "correct_answer": "Влажные звонкие мелкопузырчатые хрипы",
       "explanation": [
         "Влажные звонкие мелкопузырчатые хрипы - это звуки, возникающие в дыхательных путях, которые могут указывать на наличие экссудата в легких.",
@@ -158,7 +161,7 @@
     {
       "id": 15,
       "text": "Какой звук вы слышите при аускультации?",
-      "audio_paths": ["lung/krepi.ogg", "lung/krepitacija-posle.ogg"],
+      "files": ["lung_sounds/krepi.ogg", "lung_sounds/krepitacija-posle.ogg"],
       "correct_answer": "Крепитация",
       "explanation": [
         "Крепитация – это звук, который возникает в дыхательных путях при дыхании или при обследовании легких. Этот звук имеет характерную «хрустящую» или «шипящую» природу.",
@@ -169,10 +172,10 @@
     {
       "id": 16,
       "text": "Какой звук вы слышите при аускультации?",
-      "audio_paths": [
-        "lung/prervy.ogg",
-        "lung/plerva-posle.ogg",
-        "lung/trenie.ogg"
+      "files": [
+        "lung_sounds/prervy.ogg",
+        "lung_sounds/plerva-posle.ogg",
+        "lung_sounds/trenie.ogg"
       ],
       "correct_answer": "Шум трения плевры",
       "explanation": [
