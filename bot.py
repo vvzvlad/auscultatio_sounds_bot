@@ -924,7 +924,7 @@ def handle_answer_callback(call):
             if question_data and 'explanation' in question_data:   #Обьяснение правильного ответа
                 response += f"{chr(10).join(question_data['explanation'])}\n\n"
 
-            if 'files' not in selected_answer_data:
+            if selected_answer_data is None or 'files' not in selected_answer_data:
                 bot.send_message(call.message.chat.id, response, parse_mode="Markdown", reply_markup=keyboard)
                 response = ""
             
