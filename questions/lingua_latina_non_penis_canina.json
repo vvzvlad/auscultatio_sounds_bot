@@ -649,19 +649,9 @@
       "correct_answer": "Отдаленный от рта"
     },
     {
-      "id": 131,
-      "text": "Переведите c латыни: anterior",
-      "correct_answer": "Передний"
-    },
-    {
       "id": 132,
       "text": "Переведите c латыни: posterior",
       "correct_answer": "Задний"
-    },
-    {
-      "id": 133,
-      "text": "Переведите c латыни: superior",
-      "correct_answer": "Верхний"
     },
     {
       "id": 134,
@@ -1149,19 +1139,9 @@
       "correct_answer": "Верхний"
     },
     {
-      "id": 231,
-      "text": "Переведите c латыни: inferior",
-      "correct_answer": "Нижний"
-    },
-    {
       "id": 232,
       "text": "Переведите c латыни: anterior",
       "correct_answer": "Передний"
-    },
-    {
-      "id": 233,
-      "text": "Переведите c латыни: posterior",
-      "correct_answer": "Задний"
     },
     {
       "id": 234,
@@ -1337,11 +1317,6 @@
       "id": 268,
       "text": "Переведите c латыни: infectiosus",
       "correct_answer": "Инфекционный"
-    },
-    {
-      "id": 269,
-      "text": "Переведите c латыни: verus",
-      "correct_answer": "Истинный"
     },
     {
       "id": 270,
