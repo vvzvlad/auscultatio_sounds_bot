@@ -22,6 +22,11 @@ import telebot
 from telebot import types
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
+from json.decoder import JSONDecodeError
+
+# Constants
+QUESTIONS_DIR = Path('questions')
+SESSIONS_DIR = Path('data/user_sessions')
 
 logging.basicConfig(
     level=logging.INFO,
@@ -58,20 +63,19 @@ def get_user_info(user) -> str:
     return f"{user.first_name} ({user.id})"
 
 class UserSession:
-    SESSIONS_DIR = Path('data/user_sessions')
-
     def __init__(self, user):
         self.user_info = get_user_info(user)
         self.user_id = user.id
         self.user_name = user.username or user.first_name
         self.lock = threading.RLock()
+        self.sessions_dir = SESSIONS_DIR
 
         # Create all necessary directories
-        self.SESSIONS_DIR.parent.mkdir(exist_ok=True)  # Create 'data' directory
-        self.SESSIONS_DIR.mkdir(exist_ok=True)  # Create 'user_sessions' directory
+        self.sessions_dir.parent.mkdir(exist_ok=True)  # Create 'data' directory
+        self.sessions_dir.mkdir(exist_ok=True)  # Create 'user_sessions' directory
 
         # Define session file path
-        self.session_file = self.SESSIONS_DIR / f"user_{self.user_id}.json"
+        self.session_file = self.sessions_dir / f"user_{self.user_id}.json"
 
         # Try to load existing session
         if self.session_file.exists():
@@ -627,7 +631,7 @@ def get_global_stats(theme: str = None):
     user_stats = []
     
     # Scan all user session files
-    for session_file in glob.glob(os.path.join(UserSession.SESSIONS_DIR, "*.json")):
+    for session_file in glob.glob(os.path.join(SESSIONS_DIR, "*.json")):
         try:
             with open(session_file, 'r', encoding='utf-8') as f:
                 user_data = json.load(f)
@@ -801,7 +805,7 @@ def handle_theme_callback(call):
         theme_parts = call.data.split(":")
         if len(theme_parts) != 2:
             logger.error(f"Invalid theme callback data format: {call.data}")
-            bot.answer_callback_query(call.id, "Неверный формат данных")
+            bot.answer_callback_query(call.id, "Неверный формат данны")
             return
             
         theme = theme_parts[1]
@@ -937,40 +941,44 @@ def handle_answer_callback(call):
                 response += "\n".join(question_data['explanation']) + "\n\n"
 
             bot.send_message(call.message.chat.id, response, reply_markup=keyboard, parse_mode="Markdown")
+            response = ""
         else:
             # Send initial wrong answer message
             response = (
-                f"❌ *{selected_answer}* — неправильный ответ ❌\n\n"
-                f"Правильный — *{correct_answer.lower()}*.\n\n"
+                f"❌ *{selected_answer}* — неправильный ответ ❌\n\n" #Неправильный ответ
+                f"Правильный — *{correct_answer.lower()}*.\n\n" #Правильный ответ
             )
-            
-            if question_data and 'explanation' in question_data:
+            if question_data and 'explanation' in question_data:   #Обьяснение правильного ответа
                 response += f"{chr(10).join(question_data['explanation'])}\n\n"
             
             if selected_answer_data and 'files' in selected_answer_data:
                 wrong_answer_file_path = os.path.join('questions', selected_answer_data['files'][0])
                 if "mp3" in wrong_answer_file_path or "ogg" in wrong_answer_file_path:
-                    response += f"\nА вот как звучит *{selected_answer.lower()}*:"
+                    response += f"\nА вот как звучит *{selected_answer.lower()}*:" #А вот как звучит неправильный ответ
                     bot.send_message(call.message.chat.id, response, parse_mode="Markdown")
+                    response = ""
                     print(f"Sending audio file: {wrong_answer_file_path}")
                     try:
                         with open(wrong_answer_file_path, 'rb') as audio:
-                            bot.send_voice(call.message.chat.id, audio)
+                            bot.send_voice(call.message.chat.id, audio) #Неправильный ответ аудио
                     except Exception as e:
                         logger.error(f"Failed to send audio file {wrong_answer_file_path} for user {user_info}: {e}")
                 if "jpg" in wrong_answer_file_path or "png" in wrong_answer_file_path:
-                    response += f"\nА вот как выглядит *{selected_answer.lower()}*:"
+                    wrong_question = selected_answer_data['text'].lower()
+                    wrong_answer = selected_answer.lower()
+                    response += f"\nА вот как выглядит *{wrong_answer}* ({wrong_question}):" #А вот как выглядит неправильный ответ
                     bot.send_message(call.message.chat.id, response, parse_mode="Markdown")
+                    response = ""
                     print(f"Sending image file: {wrong_answer_file_path}")
                     try:
                         with open(wrong_answer_file_path, 'rb') as file:
-                            bot.send_photo(call.message.chat.id, file)
+                            bot.send_photo(call.message.chat.id, file) #Неправильный ответ картинка
                     except Exception as e:
                         logger.error(f"Failed to send image file {wrong_answer_file_path} for user {user_info}: {e}")
-
-            if selected_answer_data and 'explanation' in selected_answer_data:
-                response += f"\n{chr(10).join(selected_answer_data['explanation'])}"
             
+            response = ""
+            if selected_answer_data and 'explanation' in selected_answer_data: 
+                response += f"\n{chr(10).join(selected_answer_data['explanation'])}" #Обьяснение неправильного ответа
             bot.send_message(call.message.chat.id, response, parse_mode="Markdown", reply_markup=keyboard)
 
         bot.answer_callback_query(call.id)
@@ -1003,10 +1011,41 @@ class CodeChangeHandler(FileSystemEventHandler):
                 except Exception as e:
                     logger.error(f"Failed to restart bot: {e}")
 
+def validate_json_files(directory: Path, description: str = "JSON files"):
+    """Validate all JSON files in specified directory"""
+    logger.info(f"Validating {description} in {directory}")
+    
+    if not directory.exists():
+        logger.info(f"Directory {directory} does not exist yet")
+        return
+        
+    json_files = list(directory.glob('*.json'))
+    if not json_files:
+        logger.info(f"No JSON files found in {directory}")
+        return
+        
+    for file_path in json_files:
+        try:
+            logger.info(f"Validating {file_path}")
+            with open(file_path, 'r', encoding='utf-8') as f:
+                json.load(f)
+        except JSONDecodeError as e:
+            error_msg = f"Invalid JSON in {file_path}: {str(e)}"
+            logger.error(error_msg)
+            raise
+            
+    logger.info(f"All {description} are valid")
+
 if __name__ == '__main__':
     logger.info("\n\n\nStarting bot...")
-
     
+    try:
+        validate_json_files(QUESTIONS_DIR, "question files")
+        validate_json_files(SESSIONS_DIR, "user session files")
+    except Exception as e:
+        logger.error(f"Failed to validate JSON files: {e}")
+        sys.exit(1)
+        
     # Set up file watcher
     event_handler = CodeChangeHandler()
     observer = Observer()
@@ -1021,10 +1060,9 @@ if __name__ == '__main__':
         except (requests.exceptions.ConnectionError, 
                 requests.exceptions.ReadTimeout,
                 NewConnectionError) as e:
-
             logger.error(f"Network error occurred: {e}")
             logger.info("Waiting 2 seconds before retry...")
-            time.sleep(2) 
+            time.sleep(2)
             continue
         except Exception as e:
             # Log any other unexpected errors
