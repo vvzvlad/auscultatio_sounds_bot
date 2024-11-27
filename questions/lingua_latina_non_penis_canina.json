@@ -114,11 +114,6 @@
       "correct_answer": "Плазма"
     },
     {
-      "id": 23,
-      "text": "Переведите c латыни: mensio",
-      "correct_answer": "Измерение"
-    },
-    {
       "id": 24,
       "text": "Переведите c латыни: radix",
       "correct_answer": "Корень"
@@ -292,11 +287,6 @@
       "id": 58,
       "text": "Переведите c латыни: empyēma",
       "correct_answer": "Эмпиема"
-    },
-    {
-      "id": 59,
-      "text": "Переведите c латыни: oedēma",
-      "correct_answer": "Отек"
     },
     {
       "id": 60,
@@ -829,11 +819,6 @@
       "correct_answer": "Проксимальный"
     },
     {
-      "id": 169,
-      "text": "Переведите c латыни: placidus",
-      "correct_answer": "Плоский"
-    },
-    {
       "id": 170,
       "text": "Переведите c латыни: fibrosus",
       "correct_answer": "Фиброзный"
@@ -1319,11 +1304,6 @@
       "correct_answer": "Инфекционный"
     },
     {
-      "id": 270,
-      "text": "Переведите c латыни: spurius",
-      "correct_answer": "Ложный"
-    },
-    {
       "id": 271,
       "text": "Переведите c латыни: descendens",
       "correct_answer": "Нисходящий"
@@ -1355,7 +1335,7 @@
     },
     {
       "id": 277,
-      "text": "Переведите c латыни: planus",
+      "text": "Переведите c латыни: planus, placidus",
       "correct_answer": "Плоский"
     },
     {
@@ -1449,16 +1429,6 @@
       "correct_answer": "Филия"
     },
     {
-      "id": 296,
-      "text": "Переведите c латыни: -osis",
-      "correct_answer": "Оз"
-    },
-    {
-      "id": 297,
-      "text": "Переведите c латыни: -iasis",
-      "correct_answer": "Оз"
-    },
-    {
       "id": 298,
       "text": "Переведите c латыни: -phobia",
       "correct_answer": "Боязнь"
@@ -1499,19 +1469,9 @@
       "correct_answer": "Ушиб"
     },
     {
-      "id": 306,
-      "text": "Переведите c латыни: dolor",
-      "correct_answer": "Боль"
-    },
-    {
       "id": 307,
       "text": "Переведите c латыни: emesis",
       "correct_answer": "Рвота"
-    },
-    {
-      "id": 308,
-      "text": "Переведите c латыни: febris",
-      "correct_answer": "Лихорадка"
     },
     {
       "id": 309,
@@ -1642,16 +1602,6 @@
       "id": 334,
       "text": "Переведите c латыни: -scopia",
       "correct_answer": "Наблюдение, визуальное изучение"
-    },
-    {
-      "id": 335,
-      "text": "Переведите c латыни: therapia",
-      "correct_answer": "Лечение"
-    },
-    {
-      "id": 336,
-      "text": "Переведите c латыни: iatria",
-      "correct_answer": "Лечение"
     },
     {
       "id": 337,

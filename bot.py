@@ -276,13 +276,19 @@ class UserSession:
                     selected_wrong = random.sample(wrong_answers, num_options - 1)
                 else:
                     # Use provided wrong_answers and supplement with random ones
-                    other_answers = [q['correct_answer'] for q in questions if q['id'] != question['id']]
+                    # Filter out answers that match the correct answer
+                    other_answers = [q['correct_answer'] for q in questions 
+                                    if q['id'] != question['id'] and 
+                                    q['correct_answer'] != correct_answer]
                     needed = (num_options - 1) - len(wrong_answers)
                     random_wrong = random.sample(other_answers, needed) if needed > 0 else []
                     selected_wrong = wrong_answers + random_wrong
                 options = selected_wrong + [correct_answer]
             else:
-                other_answers = [q['correct_answer'] for q in questions if q['id'] != question['id']]
+                # Filter out answers that match the correct answer
+                other_answers = [q['correct_answer'] for q in questions 
+                                if q['id'] != question['id'] and 
+                                q['correct_answer'] != correct_answer]
                 wrong_answers = random.sample(other_answers, min(len(other_answers), num_options - 1))
                 options = wrong_answers + [correct_answer]
             
@@ -381,6 +387,9 @@ class QuestionSelector:
                         logger.error(f"Missing questions files for theme '{theme_tag}':\n{files_str}")
                         raise ValueError(f"Missing questions files for theme '{theme_tag}':\n{files_str}")
 
+                    # Check for duplicate correct_answer in questions
+                    self._check_duplicate_correct_answers(theme_data['questions'], theme_tag)
+
                     # Check for duplicate question IDs within this theme
                     questions = theme_data.get('questions', [])
                     seen_question_ids = set()
@@ -416,6 +425,15 @@ class QuestionSelector:
                     if not full_path.exists():
                         missing_files.append(str(full_path))
         return missing_files
+
+    def _check_duplicate_correct_answers(self, questions, theme_tag):
+        """Check for duplicate correct_answer in questions"""
+        correct_answers = set()
+        for question in questions:
+            answer = question.get('correct_answer')
+            if answer in correct_answers:
+                logger.error(f"Duplicate correct_answer '{answer}' found in theme '{theme_tag}'")
+            correct_answers.add(answer)
 
     def set_theme(self, theme_tag: str) -> bool:
         if theme_tag in self.themes:
