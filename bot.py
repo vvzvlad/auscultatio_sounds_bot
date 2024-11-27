@@ -43,9 +43,9 @@ logger.info(f"Bot init, token: {bot_token}")
 bot = telebot.TeleBot(bot_token)
 
 
-# Global dictionary to store sessions
-sessions = {}
-sessions_lock = threading.RLock()
+sessions = {} # Global dictionary to store sessions
+sessions_lock = threading.RLock() # Global lock for sessions
+file_id_cache = {} # tg file_id cache
 
 def get_position_emoji(position: int) -> str:
     emojis = ["", "🥇", "🥈", "🥉"]
@@ -508,54 +508,9 @@ def generate_and_send_question(session, chat_id, user_info):
         bot.send_message(chat_id, f"{question['text']}\n\n")
 
         if question.get('file'):
-            if "mp3" in question['file'] or "ogg" in question['file']:
-                logger.info(f"Selected audio file {question['file']}")
-                file_path = os.path.join('questions', question['file'])
-                logger.info(f"File path: {file_path}")
-                if not os.path.exists(file_path):
-                    logger.error(f"File not found: {file_path}")
-                    bot.send_message(chat_id, f"Не удалось найти файл: {file_path}")
-                    return False
-                try:
-                    with open(file_path, 'rb') as file:
-                        bot.send_voice(chat_id, file)
-                    logger.info(f"Sent audio file for user {user_info}: {file_path}")
-                except telebot.apihelper.ApiTelegramException as e:
-                    if "VOICE_MESSAGES_FORBIDDEN" in str(e) or "user restricted receiving of video messages" in str(e):
-                        error_message = (
-                            "❌ Вам запрещено присылать голосовые сообщения.\n"
-                            "Для того, чтобы мы могли отправить примеры аускультаций, необходимо разрешить отправку вам голосовых сообщений:\n"
-                            "1. Откройте настройки телеграма\n"
-                            "2. Перейдите в раздел «Конфиденциальность»\n"
-                            "3. Выберите пункт «Голосовые сообщения»\n"
-                            "4. Добавьте бота в список исключений или разрешите отправку всем пользователям\n"
-                        )
-                        logger.error(f"Voice messages forbidden for user {user_info}")
-                        keyboard = types.InlineKeyboardMarkup()
-                        next_button = types.InlineKeyboardButton(text="Я разрешил ✅", callback_data="next")
-                        keyboard.add(next_button)
-                        bot.send_message(chat_id, error_message, reply_markup=keyboard)
-                        return False
-                    else:
-                        logger.error(f"Failed to send audio file {file_path} for user {user_info}: {e}")
-                        bot.send_message(chat_id, "Не удалось отправить аудиоайл")
-                        return False
-            if "jpg" in question['file'] or "png" in question['file']:
-                logger.info(f"Selected image file {question['file']}")
-                file_path = os.path.join('questions', question['file'])
-                logger.info(f"File path: {file_path}")
-                if not os.path.exists(file_path):
-                    logger.error(f"File not found: {file_path}")
-                    bot.send_message(chat_id, f"Не удалось найти файл: {file_path}")
-                    return False
-                try:
-                    with open(file_path, 'rb') as file:
-                        bot.send_photo(chat_id, file)
-                    logger.info(f"Sent image file for user {user_info}: {file_path}")
-                except telebot.apihelper.ApiTelegramException as e:
-                    logger.error(f"Failed to send image file {file_path} for user {user_info}: {e}")
-                    bot.send_message(chat_id, "Не удалось отправить изображение")
-                    return False
+            file_path = os.path.join('questions', question['file'])
+            if not send_file(bot, chat_id, file_path):
+                return False
         
         # Send options with keyboard
         options = question['options']
@@ -950,6 +905,10 @@ def handle_answer_callback(call):
             )
             if question_data and 'explanation' in question_data:   #Обьяснение правильного ответа
                 response += f"{chr(10).join(question_data['explanation'])}\n\n"
+
+            if 'files' not in selected_answer_data:
+                bot.send_message(call.message.chat.id, response, parse_mode="Markdown", reply_markup=keyboard)
+                response = ""
             
             if selected_answer_data and 'files' in selected_answer_data:
                 wrong_answer_file_path = os.path.join('questions', selected_answer_data['files'][0])
@@ -957,29 +916,20 @@ def handle_answer_callback(call):
                     response += f"\nА вот как звучит *{selected_answer.lower()}*:" #А вот как звучит неправильный ответ
                     bot.send_message(call.message.chat.id, response, parse_mode="Markdown")
                     response = ""
-                    print(f"Sending audio file: {wrong_answer_file_path}")
-                    try:
-                        with open(wrong_answer_file_path, 'rb') as audio:
-                            bot.send_voice(call.message.chat.id, audio) #Неправильный ответ аудио
-                    except Exception as e:
-                        logger.error(f"Failed to send audio file {wrong_answer_file_path} for user {user_info}: {e}")
+                    send_file(bot, call.message.chat.id, wrong_answer_file_path) #Неправильный ответ аудио
+
                 if "jpg" in wrong_answer_file_path or "png" in wrong_answer_file_path:
                     wrong_question = selected_answer_data['text'].lower()
                     wrong_answer = selected_answer.lower()
                     response += f"\nА вот как выглядит *{wrong_answer}* ({wrong_question}):" #А вот как выглядит неправильный ответ
                     bot.send_message(call.message.chat.id, response, parse_mode="Markdown")
                     response = ""
-                    print(f"Sending image file: {wrong_answer_file_path}")
-                    try:
-                        with open(wrong_answer_file_path, 'rb') as file:
-                            bot.send_photo(call.message.chat.id, file) #Неправильный ответ картинка
-                    except Exception as e:
-                        logger.error(f"Failed to send image file {wrong_answer_file_path} for user {user_info}: {e}")
-            
-            response = ""
-            if selected_answer_data and 'explanation' in selected_answer_data: 
-                response += f"\n{chr(10).join(selected_answer_data['explanation'])}" #Обьяснение неправильного ответа
-            bot.send_message(call.message.chat.id, response, parse_mode="Markdown", reply_markup=keyboard)
+                    send_file(bot, call.message.chat.id, wrong_answer_file_path) #Неправильный ответ картинка
+                
+            if selected_answer_data and 'explanation' in selected_answer_data:  #Обьяснение неправильного ответа, если есть
+                response = ""
+                response += f"\n{chr(10).join(selected_answer_data['explanation'])}" 
+                bot.send_message(call.message.chat.id, response, parse_mode="Markdown", reply_markup=keyboard)
 
         bot.answer_callback_query(call.id)
 
@@ -990,7 +940,7 @@ def handle_answer_callback(call):
     except Exception as e:
         logger.error(f"Error handling answer callback from user {user_info}: {e}", exc_info=True)
         bot.send_message(call.message.chat.id, f"Произошла чудовищная ошибка: {e}")
-        bot.answer_callback_query(call.id, "Произошла чудовищная ошибка.")
+        bot.answer_callback_query(call.id, "Произошла чудовищная ошибка!")
 
 class CodeChangeHandler(FileSystemEventHandler):
     def __init__(self):
@@ -1035,6 +985,67 @@ def validate_json_files(directory: Path, description: str = "JSON files"):
             raise
             
     logger.info(f"All {description} are valid")
+
+def send_file(bot, chat_id, file_path):
+    """Helper function to send files with caching file_ids
+    Returns: True if successful, False otherwise"""
+    try:
+        if not os.path.exists(file_path):
+            logger.error(f"File not found: {file_path}")
+            bot.send_message(chat_id, f"Не найден файл {file_path}")
+            return False
+
+        # Determine file type and send accordingly
+        if file_path.endswith(('.mp3', '.ogg', '.wav')):
+            try:
+                if file_path in file_id_cache:
+                    logger.info(f"Sending cached audio file: {file_path}")
+                    message = bot.send_voice(chat_id, file_id_cache[file_path])
+                else:
+                    with open(file_path, 'rb') as file:
+                        message = bot.send_voice(chat_id, file)
+                        file_id_cache[file_path] = message.voice.file_id
+                        logger.info(f"Sending audio file: {file_path}, stored in cache: {file_id_cache[file_path]}")
+                logger.info(f"Sent audio file: {file_path}")
+                return True
+            except telebot.apihelper.ApiTelegramException as e:
+                if "VOICE_MESSAGES_FORBIDDEN" in str(e):
+                    error_message = (
+                        "❌ Вам запрещено присылать голосовые сообщения.\n"
+                        "Для того, чтобы мы могли отправить аудио, необходимо разрешить отправку вам голосовых сообщений:\n"
+                        "1. Откройте настройки телеграма\n"
+                        "2. Перейдите в раздел «Конфиденциальность»\n"
+                        "3. Выберите пункт «Голосовые сообщения»\n"
+                        "4. Добавьте бота в список исключений или разрешите отправку всем пользователям\n"
+                    )
+                    logger.error(f"Voice messages forbidden for {chat_id}")
+                    keyboard = types.InlineKeyboardMarkup()
+                    next_button = types.InlineKeyboardButton(text="Я разрешил ✅", callback_data="next")
+                    keyboard.add(next_button)
+                    bot.send_message(chat_id, error_message, reply_markup=keyboard)
+                    return False
+                raise
+
+        elif file_path.endswith(('.jpg', '.png', '.jpeg', '.webp', '.gif', '.bmp')):
+            if file_path in file_id_cache:
+                logger.info(f"Sending cached image file: {file_path}")
+                message = bot.send_photo(chat_id, file_id_cache[file_path])
+            else:
+                with open(file_path, 'rb') as file:
+                    message = bot.send_photo(chat_id, file)
+                    file_id_cache[file_path] = message.photo[0].file_id
+                    logger.info(f"Sending image file: {file_path}, stored in cache: {file_id_cache[file_path]}")
+            logger.info(f"Sent image file: {file_path}")
+            return True
+
+        else:
+            logger.error(f"Unsupported file type: {file_path}")
+            return False
+
+    except Exception as e:
+        logger.error(f"Failed to send file {file_path}: {e}")
+        bot.send_message(chat_id, f"Не удалось отправить файл {file_path}: {e}")
+        return False
 
 if __name__ == '__main__':
     logger.info("\n\n\nStarting bot...")
