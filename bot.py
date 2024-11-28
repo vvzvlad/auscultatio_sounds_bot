@@ -500,7 +500,6 @@ def get_question_from_themes(themes, search_key, search_value):
 def generate_and_send_question(session, chat_id, user_info):
     """Helper function to generate and send a question to user"""
     try:
-        
         # Check if theme is selected
         current_theme = session.question_selector.current_theme
         if not current_theme:
@@ -517,8 +516,6 @@ def generate_and_send_question(session, chat_id, user_info):
             bot.send_message(chat_id, "Тема не выбрана. Выберите своего бойца:", reply_markup=keyboard)
             return False
             
-        # Use the new method to get the least correct question
-        
         question = session.smart_get_question()
         
         logger.info(f"Generated question {question['question_id']} for user {user_info}")
@@ -548,9 +545,21 @@ def generate_and_send_question(session, chat_id, user_info):
         session.set_last_question(question)
         return True
     except ValueError as e:
-        error_message = f"Ошибка при генерации вопроса: {e}"
-        logger.error(f"Error generating question for user {user_info}: {e}")
-        bot.send_message(chat_id, error_message)
+        if str(e) == "Theme not selected.":
+            # Create keyboard with theme buttons
+            keyboard = types.InlineKeyboardMarkup(row_width=1)
+            themes = session.question_selector.get_themes()
+            for theme in themes:
+                button = types.InlineKeyboardButton(
+                    text=theme['name'],
+                    callback_data=f"theme:{theme['tag']}"
+                )
+                keyboard.add(button)
+            bot.send_message(chat_id, "Тема не выбрана. Выберите своего бойца:", reply_markup=keyboard)
+        else:
+            error_message = f"Ошибка при генерации вопроса: {e}"
+            logger.error(f"Error generating question for user {user_info}: {e}")
+            bot.send_message(chat_id, error_message)
         return False
     
 @bot.message_handler(commands=['start'])
